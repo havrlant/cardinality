@@ -73,7 +73,8 @@ void computeMaxes(Hyperloglog *website, Hyperloglog **sections, Hyperloglog **po
         update_M(sections[index], digest);
         
         // jednotlive pozice
-        index = ((ad_space_pk == 89229) ? 15 : ad_space_pk - 89202);
+        // index = ((ad_space_pk == 89229) ? 15 : ad_space_pk - 89202);
+        index = find_index_by_ad_space_pk(structure, ad_space_pk);
         update_M(positions[index], digest);
     }
     free(digest);

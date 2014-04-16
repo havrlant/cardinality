@@ -54,6 +54,11 @@ Structure load_structure(FILE *fd, int max_length_line) {
 }
 
 StructureRow *find_row_by_ad_space_pk(Structure structure, int ad_space_pk) {
+    int index = find_index_by_ad_space_pk(structure, ad_space_pk);
+    return &structure.rows[index];
+}
+
+int find_index_by_ad_space_pk(Structure structure, int ad_space_pk) {
     uint left = 0, right = structure.length - 1;
     uint middle;
     uint temp_ad_space_pk;
@@ -66,5 +71,5 @@ StructureRow *find_row_by_ad_space_pk(Structure structure, int ad_space_pk) {
             right = middle;
         }
     }
-    return &structure.rows[right];
+    return right;
 }
