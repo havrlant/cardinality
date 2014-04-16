@@ -1,6 +1,6 @@
 ## Instalace
 
-    git clone https://github.com/havrlant/kardinalita.git
+    git clone https://github.com/havrlant/cardinality.git
     cd kardinalita
     make
 
