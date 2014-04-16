@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "simpleCSV.h"
+#include "declarations.h"
 
 typedef struct {
     int ad_space_pk;
