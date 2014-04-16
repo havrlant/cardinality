@@ -1,7 +1,7 @@
 ## Instalace
 
     git clone https://github.com/havrlant/cardinality.git
-    cd kardinalita
+    cd cardinality
     make
 
 Vytvoří se spustitelný soubor `cardinality`. Program bere dva povinné a jeden nepovinný parametr:
