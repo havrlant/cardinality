@@ -41,7 +41,7 @@ Structure load_structure(FILE *fd, int max_length_line) {
     SimpleCSVParser parser;
     init_parser(&parser, fd, max_length_line, 5);
     int i;
-    for (i = 0; next_line(&parser) == 0; i++) {
+    for (i = 0; next_line(&parser); i++) {
         if (i == buffsize) {
             buffsize *= 2;
             rows = realloc(rows, sizeof(StructureRow) * buffsize);

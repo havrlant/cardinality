@@ -25,7 +25,7 @@ int next_line(SimpleCSVParser *parser) {
         }
         parser->fields_read = counter;
     } else {
-        return 1;
+        return 0;
     }
-    return 0;
+    return 1;
 }

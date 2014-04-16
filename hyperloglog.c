@@ -58,7 +58,7 @@ void computeMaxes(Hyperloglog *website, Hyperloglog **sections, Hyperloglog **po
     int index;
     char *word;
     byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
-    while (next_line(parser) == 0) {
+    while (next_line(parser)) {
         word = parser->fields[2];
         str2md5(word, digest);
         
