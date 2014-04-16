@@ -1,11 +1,3 @@
-//
-//  main.c
-//  cardinality
-//
-//  Created by Lukáš Havrlant on 16.4.14.
-//  Copyright (c) 2014 Lukáš Havrlant. All rights reserved.
-//
-
 #include <stdio.h>
 #include "simpleCSV.h"
 #include "structure.h"
@@ -28,7 +20,7 @@ int main(int argc, const char * argv[])
     SimpleCSVParser parser;
     init_parser(&parser, fd, 100, 10);
     double card = hyperloglog(12, &parser, structure);
-    printf("Kardinalita: %g\n", card);
+    // printf("Kardinalita: %g\n", card);
     return 0;
 }
 

@@ -48,21 +48,28 @@ uint bucketIndex(byte *digest, Hyperloglog *hll) {
 
 
 // Spocita rho hodnoty pro vsechny vstupni retezce a ulozi je do spravnych buckets
-void update_M(Hyperloglog *hll, char **csv_row, StructureRow srow) {
-    byte *digest;
+void update_M(Hyperloglog *hll, byte *digest) {
     uint j, first1;
-    digest = str2md5(csv_row[2], (int)strlen(csv_row[2]));
     j = bucketIndex(digest, hll);
     first1 = rho(digest, hll->digestBitLength, hll->b);
     hll->M[j] = max(hll->M[j], first1);
-    free(digest);
 }
 
-void computeMaxes(Hyperloglog *hll, SimpleCSVParser *parser) {
-    StructureRow row;
-    hll->M = (byte*) calloc(hll->m, sizeof(byte));
+void computeMaxes(Hyperloglog *hll, Hyperloglog *sections[], Structure structure, SimpleCSVParser *parser) {
+    StructureRow srow;
+    int index;
+    byte *digest;
+    char *word;
     while (next_line(parser) == 0) {
-        update_M(hll, parser->fields, row);
+        // cely web
+        word = parser->fields[2];
+        digest = str2md5(word, (int)strlen(word));
+        update_M(hll, digest);
+        
+        // jednotlive sekce
+        srow = find_row_by_ad_space_pk(structure, atoi(parser->fields[1]));
+        index = srow.section_id[0] - '1';
+        update_M(sections[index], digest);
     }
 }
 
@@ -82,13 +89,65 @@ double computeHyperAlpha(unsigned int m) {
     return 0.7213 / (1 + 1.079 / m);
 }
 
+void init_hll(Hyperloglog *hll, uint b) {
+    hll->b = b;
+    hll->m = 1 << b; // 2^b
+    hll->digestBitLength = 32;
+    hll->M = (byte*) calloc(hll->m, sizeof(byte));
+}
+
 double hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
-    Hyperloglog hll;
-    hll.b = b;
-    hll.m = (uint) pow(2, b);
-    hll.digestBitLength = 32;
-    computeMaxes(&hll, parser);
-    double cardinality = computeHyperCardinality(&hll, computeHyperAlpha(hll.m));
+    // cely web
+    Hyperloglog website;
+    init_hll(&website, b);
+    
+    // dve podsekce
+    Hyperloglog **sections = (Hyperloglog**) malloc(2 * sizeof(Hyperloglog*));
+    for (int i = 0; i < 2; i++) {
+        sections[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));
+        init_hll(sections[i], b);
+    }
+    
+    computeMaxes(&website, sections, structure, parser);
+    double cardinality = computeHyperCardinality(&website, computeHyperAlpha(website.m));
+    printf("Cely web: %g\n", cardinality);
+    for (int i = 0; i < 2; i++) {
+        cardinality = computeHyperCardinality(sections[i], computeHyperAlpha(sections[i]->m));
+        printf("Sekce c. %i: %g\n", i + 1, cardinality);
+    }
     // ToDo: applyCorrections
     return cardinality;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
