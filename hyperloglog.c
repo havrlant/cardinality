@@ -167,36 +167,3 @@ double hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
     
     return cardinality;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
