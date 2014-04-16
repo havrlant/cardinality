@@ -8,7 +8,7 @@
 typedef struct {
     int ad_space_pk;
     char *site_id;
-    char *section_id;
+    int section_id;
     char *position_id;
     char *position_bannertype_id;
 } StructureRow;

@@ -1,6 +1,7 @@
 #include "hyperloglog.h"
 
 const int BITS_IN_BYTE = 8;
+const int AD_SPACE_PK_INDEX = 1;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -53,7 +54,7 @@ void update_M(Hyperloglog *hll, byte *digest) {
     hll->M[j] = max(hll->M[j], first1);
 }
 
-void computeMaxes(Hyperloglog *hll, Hyperloglog **sections, Hyperloglog **positions, Structure structure, SimpleCSVParser *parser) {
+void computeMaxes(Hyperloglog *website, Hyperloglog **sections, Hyperloglog **positions, Structure structure, SimpleCSVParser *parser) {
     StructureRow *srow;
     int index;
     char *word;
@@ -63,12 +64,12 @@ void computeMaxes(Hyperloglog *hll, Hyperloglog **sections, Hyperloglog **positi
         str2md5(word, digest);
         
         // cely web
-        update_M(hll, digest);
+        update_M(website, digest);
         
         // jednotlive sekce
-        int ad_space_pk = atoi(parser->fields[1]);
+        int ad_space_pk = atoi(parser->fields[AD_SPACE_PK_INDEX]);
         srow = find_row_by_ad_space_pk(structure, ad_space_pk);
-        index = srow->section_id[0] - '1';
+        index = srow->section_id - 1;
         update_M(sections[index], digest);
         
         // jednotlive pozice
@@ -130,7 +131,10 @@ double hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
     init_hll(&website, b);
     
     // dve podsekce
-    int sections_count = 2;
+    int sections_count = 0;
+    for (int i = 0; i < structure.length; i++) {
+        sections_count = max(sections_count, structure.rows[i].section_id);
+    }
     Hyperloglog **sections = (Hyperloglog**) malloc(sections_count * sizeof(Hyperloglog*));
     for (int i = 0; i < sections_count; i++) {
         sections[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));

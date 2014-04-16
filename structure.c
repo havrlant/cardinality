@@ -10,7 +10,7 @@ char *copy_string(char *string) {
 void print_row(StructureRow row) {
     printf("ad_space_pk: %i, ", row.ad_space_pk);
     printf("site_id: %s, ", row.site_id);
-    printf("section_id: %s, ", row.section_id);
+    printf("section_id: %i, ", row.section_id);
     printf("position_id: %s, ", row.position_id);
     printf("position_bannertype_id: %s\n", row.position_bannertype_id);
 }
@@ -19,10 +19,20 @@ StructureRow fields_to_row(char **fields) {
     StructureRow row;
     row.ad_space_pk = atoi(copy_string(fields[0]));
     row.site_id = copy_string(fields[1]);
-    row.section_id = copy_string(fields[2]);
+    row.section_id = atoi(fields[2]);
     row.position_id = copy_string(fields[3]);
     row.position_bannertype_id = copy_string(fields[4]);
     return row;
+}
+
+int compareStructureRow (const void *a, const void *b) {
+    if (((StructureRow*)a)->ad_space_pk < ((StructureRow*)b)->ad_space_pk) {
+        return -1;
+    }
+    if (((StructureRow*)a)->ad_space_pk > ((StructureRow*)b)->ad_space_pk) {
+        return 1;
+    }
+    return 0;
 }
 
 Structure load_structure(FILE *fd, int max_length_line) {
@@ -38,15 +48,23 @@ Structure load_structure(FILE *fd, int max_length_line) {
         }
         rows[i] = fields_to_row(parser.fields);
     }
-    
+    qsort(rows, i, sizeof(StructureRow), compareStructureRow);
     Structure s = {rows, i};
     return s;
 }
 
 StructureRow *find_row_by_ad_space_pk(Structure structure, int ad_space_pk) {
-    if (ad_space_pk == 89229) {
-        return &structure.rows[15];
-    } else {
-        return &structure.rows[ad_space_pk - 89202];
+    uint left = 0, right = structure.length - 1;
+    uint middle;
+    uint temp_ad_space_pk;
+    while (left < right) {
+        middle = (left + right) / 2;
+        temp_ad_space_pk = structure.rows[middle].ad_space_pk;
+        if (temp_ad_space_pk < ad_space_pk) {
+            left = middle + 1;
+        } else {
+            right = middle;
+        }
     }
+    return &structure.rows[right];
 }
