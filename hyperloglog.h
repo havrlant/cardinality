@@ -15,7 +15,6 @@ typedef struct {
     uint b;
     uint m;
     byte *M;
-    uint digestBitLength;
 } Hyperloglog;
 
 double hyperloglog(uint b, SimpleCSVParser *parser, Structure structure);

@@ -2,6 +2,7 @@
 
 const int BITS_IN_BYTE = 8;
 const int AD_SPACE_PK_INDEX = 1;
+const int DIGEST_BIT_LENGTH = 64;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -33,24 +34,22 @@ uint rho(const byte *digest, uint bitlength, uint bitfrom) {
  Prevede prvnich bucketBitLength bitu na cislo
  bucketIndex(1001000010, 4) = 1001 = 9
  */
-//uint bucketIndex(byte *digest, uint bucketBitLength, uint digestBitLength) {
 uint bucketIndex(byte *digest, Hyperloglog *hll) {
-    int i;
-    uint32_t index;
-    uint bytesHashLength = 4;
+    uint64_t index;
+    uint bytesHashLength = DIGEST_BIT_LENGTH / BITS_IN_BYTE;
     byte temparray[bytesHashLength];
-    for (i = 0; i < bytesHashLength; i++) {
+    for (int i = 0; i < bytesHashLength; i++) {
         temparray[bytesHashLength - i - 1]  = digest[i];
     }
-    memcpy(&index, temparray, sizeof(uint));
-    index = index >> (hll->digestBitLength - hll->b);
+    memcpy(&index, temparray, sizeof(uint64_t));
+    index = index >> (DIGEST_BIT_LENGTH - hll->b);
     return (uint)index;
 }
 
 void update_M(Hyperloglog *hll, byte *digest) {
     uint j, first1;
     j = bucketIndex(digest, hll);
-    first1 = rho(digest, hll->digestBitLength, hll->b);
+    first1 = rho(digest, DIGEST_BIT_LENGTH, hll->b);
     hll->M[j] = max(hll->M[j], first1);
 }
 
@@ -122,7 +121,6 @@ double computeHyperAlpha(unsigned int m) {
 void init_hll(Hyperloglog *hll, uint b) {
     hll->b = b;
     hll->m = 1 << b; // 2^b
-    hll->digestBitLength = 32;
     hll->M = (byte*) calloc(hll->m, sizeof(byte));
 }
 
