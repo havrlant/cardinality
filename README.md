@@ -6,7 +6,7 @@
 
 Vytvoří se spustitelný soubor `cardinality`. Program bere dva povinné a jeden nepovinný parametr:
 
-    ./cardinality <structure_file> <data_file> [&lt;b&gt;]
+    ./cardinality <structure_file> <data_file> [<b>]
 
 - `structure_file` je cesta k CSV souboru se strukturou.
 - `data_file` je cesta k CSV souboru s daty.
