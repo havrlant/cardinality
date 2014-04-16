@@ -83,7 +83,7 @@ double applyCorrections(double E, Hyperloglog *hll) {
     uint V = 0;
     double Estar = E;
     
-    if (E <= ((5 / 2) * hll->m)) {
+    if (E <= (2.5 * hll->m)) {
         for (uint i = 0; i < hll->m; i++) {
             if (hll->M[i] == 0) {
                 V++;
