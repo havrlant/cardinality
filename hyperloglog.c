@@ -46,8 +46,6 @@ uint bucketIndex(byte *digest, Hyperloglog *hll) {
     return (uint)index;
 }
 
-
-// Spocita rho hodnoty pro vsechny vstupni retezce a ulozi je do spravnych buckets
 void update_M(Hyperloglog *hll, byte *digest) {
     uint j, first1;
     j = bucketIndex(digest, hll);
@@ -55,25 +53,54 @@ void update_M(Hyperloglog *hll, byte *digest) {
     hll->M[j] = max(hll->M[j], first1);
 }
 
-void computeMaxes(Hyperloglog *hll, Hyperloglog *sections[], Structure structure, SimpleCSVParser *parser) {
-    StructureRow srow;
+void computeMaxes(Hyperloglog *hll, Hyperloglog **sections, Hyperloglog **positions, Structure structure, SimpleCSVParser *parser) {
+    StructureRow *srow;
     int index;
     byte *digest;
     char *word;
     while (next_line(parser) == 0) {
-        // cely web
         word = parser->fields[2];
         digest = str2md5(word, (int)strlen(word));
+        
+        // cely web
         update_M(hll, digest);
         
         // jednotlive sekce
-        srow = find_row_by_ad_space_pk(structure, atoi(parser->fields[1]));
-        index = srow.section_id[0] - '1';
+        int ad_space_pk = atoi(parser->fields[1]);
+        srow = find_row_by_ad_space_pk(structure, ad_space_pk);
+        index = srow->section_id[0] - '1';
         update_M(sections[index], digest);
+        
+        // jednotlive pozice
+        index = ((ad_space_pk == 89229) ? 15 : ad_space_pk - 89202);
+        update_M(positions[index], digest);
+        free(digest);
     }
 }
 
-double computeHyperCardinality(Hyperloglog *hll, double alpham) {
+double applyCorrections(double E, Hyperloglog *hll) {
+    uint V = 0;
+    double Estar = E;
+    
+    if (E <= ((5 / 2) * hll->m)) {
+        for (uint i = 0; i < hll->m; i++) {
+            if (hll->M[i] == 0) {
+                V++;
+            }
+        }
+        if (V != 0) {
+            Estar = hll->m * log2(hll->m / (double)V);
+        }
+    }
+    
+    double bound = pow(2, 32);
+    if (E > bound / 30) {
+        Estar = -bound * log2(1 - E / bound);
+    }
+    return Estar;
+}
+
+uint computeHyperCardinality(Hyperloglog *hll, double alpham) {
     int j;
     double E = 0;
     double sum = 0, harmonicMean;
@@ -82,7 +109,8 @@ double computeHyperCardinality(Hyperloglog *hll, double alpham) {
     }
     harmonicMean = hll->m / sum;
     E = alpham * hll->m * harmonicMean;
-    return E;
+    E = applyCorrections(E, hll);
+    return (uint)E;
 }
 
 double computeHyperAlpha(unsigned int m) {
@@ -102,20 +130,38 @@ double hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
     init_hll(&website, b);
     
     // dve podsekce
-    Hyperloglog **sections = (Hyperloglog**) malloc(2 * sizeof(Hyperloglog*));
-    for (int i = 0; i < 2; i++) {
+    int sections_count = 2;
+    Hyperloglog **sections = (Hyperloglog**) malloc(sections_count * sizeof(Hyperloglog*));
+    for (int i = 0; i < sections_count; i++) {
         sections[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));
-        init_hll(sections[i], b);
+        init_hll(sections[i], b - 1);
     }
     
-    computeMaxes(&website, sections, structure, parser);
-    double cardinality = computeHyperCardinality(&website, computeHyperAlpha(website.m));
-    printf("Cely web: %g\n", cardinality);
+    // jednotlive pozice
+    Hyperloglog **positions = (Hyperloglog**) malloc(structure.length * sizeof(Hyperloglog*));
+    for (int i = 0; i < structure.length; i++) {
+        positions[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));
+        init_hll(positions[i], b - 2);
+    }
+    
+    // vypocet vsech kardinalit
+    computeMaxes(&website, sections, positions, structure, parser);
+    
+    
+    // vypis vsech kardinalit
+    uint cardinality = computeHyperCardinality(&website, computeHyperAlpha(website.m));
+    printf("Cely web: %u\n", cardinality);
+    
     for (int i = 0; i < 2; i++) {
         cardinality = computeHyperCardinality(sections[i], computeHyperAlpha(sections[i]->m));
-        printf("Sekce c. %i: %g\n", i + 1, cardinality);
+        printf("Sekce c. %i: %u\n", i + 1, cardinality);
     }
-    // ToDo: applyCorrections
+    
+    for (int i = 0; i < structure.length; i++) {
+        cardinality = computeHyperCardinality(positions[i], computeHyperAlpha(positions[i]->m));
+        printf("Pozice c. %i (ad_space_pk: %i): %u\n", i + 1, structure.rows[i].ad_space_pk, cardinality);
+    }
+    
     return cardinality;
 }
 

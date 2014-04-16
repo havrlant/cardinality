@@ -20,6 +20,6 @@ typedef struct {
 
 Structure load_structure(FILE *fd, int max_length_line);
 void print_row(StructureRow row);
-StructureRow find_row_by_ad_space_pk(Structure structure, int ad_space_pk);
+StructureRow *find_row_by_ad_space_pk(Structure structure, int ad_space_pk);
 
 #endif

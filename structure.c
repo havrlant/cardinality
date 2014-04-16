@@ -43,10 +43,10 @@ Structure load_structure(FILE *fd, int max_length_line) {
     return s;
 }
 
-StructureRow find_row_by_ad_space_pk(Structure structure, int ad_space_pk) {
+StructureRow *find_row_by_ad_space_pk(Structure structure, int ad_space_pk) {
     if (ad_space_pk == 89229) {
-        return structure.rows[15];
+        return &structure.rows[15];
     } else {
-        return structure.rows[ad_space_pk - 89202];
+        return &structure.rows[ad_space_pk - 89202];
     }
 }
