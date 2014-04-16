@@ -9,8 +9,9 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 #include "declarations.h"
 
-byte *str2md5(const char *str, int length);
+void str2md5(const char *str, byte *checksum);
 
 #endif

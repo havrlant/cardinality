@@ -56,11 +56,11 @@ void update_M(Hyperloglog *hll, byte *digest) {
 void computeMaxes(Hyperloglog *hll, Hyperloglog **sections, Hyperloglog **positions, Structure structure, SimpleCSVParser *parser) {
     StructureRow *srow;
     int index;
-    byte *digest;
     char *word;
+    byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
     while (next_line(parser) == 0) {
         word = parser->fields[2];
-        digest = str2md5(word, (int)strlen(word));
+        str2md5(word, digest);
         
         // cely web
         update_M(hll, digest);
@@ -74,8 +74,8 @@ void computeMaxes(Hyperloglog *hll, Hyperloglog **sections, Hyperloglog **positi
         // jednotlive pozice
         index = ((ad_space_pk == 89229) ? 15 : ad_space_pk - 89202);
         update_M(positions[index], digest);
-        free(digest);
     }
+    free(digest);
 }
 
 double applyCorrections(double E, Hyperloglog *hll) {

@@ -1,8 +1,8 @@
 #include "md5.h"
 
-byte *str2md5(const char *str, int length) {
+void str2md5(const char *str, byte *checksum) {
+    int length = (int)strlen(str);
     MD5_CTX c;
-    unsigned char *digest = (byte *)malloc(sizeof(unsigned char) * 16);
     const int blocklength = 512;
     MD5_Init(&c);
     
@@ -16,6 +16,5 @@ byte *str2md5(const char *str, int length) {
         str += blocklength;
     }
     
-    MD5_Final(digest, &c);
-    return digest;
+    MD5_Final(checksum, &c);
 }
