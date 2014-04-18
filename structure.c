@@ -53,18 +53,18 @@ Structure load_structure(FILE *fd, int max_length_line) {
     return s;
 }
 
-StructureRow *find_row_by_ad_space_pk(Structure structure, int ad_space_pk) {
+StructureRow *find_row_by_ad_space_pk(Structure *structure, int ad_space_pk) {
     int index = find_index_by_ad_space_pk(structure, ad_space_pk);
-    return &structure.rows[index];
+    return &structure->rows[index];
 }
 
-int find_index_by_ad_space_pk(Structure structure, int ad_space_pk) {
-    uint left = 0, right = structure.length - 1;
+int find_index_by_ad_space_pk(Structure *structure, int ad_space_pk) {
+    uint left = 0, right = structure->length - 1;
     uint middle;
     int temp_ad_space_pk;
     while (left < right) {
         middle = (left + right) / 2;
-        temp_ad_space_pk = structure.rows[middle].ad_space_pk;
+        temp_ad_space_pk = structure->rows[middle].ad_space_pk;
         if (temp_ad_space_pk < ad_space_pk) {
             left = middle + 1;
         } else {

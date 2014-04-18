@@ -17,6 +17,12 @@ typedef struct {
     byte *M;
 } Hyperloglog;
 
+typedef struct{
+    Hyperloglog *website;
+    Hyperloglog **sections;
+    Hyperloglog **positions;
+} SiteLoglog;
+
 void hyperloglog(uint b, SimpleCSVParser *parser, Structure structure);
 
 #endif
