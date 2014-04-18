@@ -10,4 +10,4 @@ Vytvoří se spustitelný soubor `cardinality`. Program bere dva povinné a jede
 
 - `structure_file` je cesta k CSV souboru se strukturou.
 - `data_file` je cesta k CSV souboru s daty.
-- `b` je číselný (integer) parametr, který je popsnaný v článku. Lze s jím ovlivnit výpočet kardinality. Výchozí hodnota je 10, očekávané hodnoty jsou v rozmezí 4 až 16. 
+- `b` je číselný (integer) parametr, který je popsnaný v článku. Parametr ovlivňuje běh algoritmu. Pro větší soubory dat se hodí větší `b`, ale program pak bude zabírat více místa v paměti. Výchozí hodnota je 10, očekávané hodnoty jsou v rozmezí 4 až 16. 
