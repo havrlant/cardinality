@@ -2,6 +2,7 @@
 
 const int BITS_IN_BYTE = 8;
 const int AD_SPACE_PK_INDEX = 1;
+const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 
 uint max(uint a, uint b) {
@@ -59,7 +60,7 @@ void fillM(SiteLoglog *siteloglog, Structure *structure, SimpleCSVParser *parser
     char *word;
     byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
     while (next_line(parser)) {
-        word = parser->fields[2];
+        word = parser->fields[USER_PK_INDEX];
         str2md5(word, digest);
         
         // cely web
