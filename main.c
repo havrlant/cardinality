@@ -37,5 +37,8 @@ int main(int argc, const char * argv[])
     SimpleCSVParser parser;
     init_parser(&parser, data_file, 200, 10);
     hyperloglog(b, &parser, &structure);
+    free_structure(&structure);
+    fclose(structure_file);
+    fclose(data_file);
     return 0;
 }

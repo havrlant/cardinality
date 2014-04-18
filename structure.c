@@ -58,6 +58,10 @@ Structure load_structure(FILE *fd, int max_length_line) {
     return (Structure){rows, i, sections_count};
 }
 
+void free_structure(Structure *structure) {
+    free(structure->rows);
+}
+
 StructureRow *find_row_by_ad_space_pk(Structure *structure, int ad_space_pk) {
     int index = find_index_by_ad_space_pk(structure, ad_space_pk);
     return &structure->rows[index];

@@ -142,6 +142,22 @@ void print_cardinalities(SiteLoglog *siteloglog, Structure *structure) {
     }
 }
 
+void free_siteloglog(SiteLoglog *siteloglog, Structure *structure) {
+    free(siteloglog->website->M);
+    
+    for (int i = 0; i < structure->section_count; i++) {
+        free(siteloglog->sections[i]->M);
+        free(siteloglog->sections[i]);
+    }
+    free(siteloglog->sections);
+    
+    for (int i = 0; i < structure->length; i++) {
+        free(siteloglog->positions[i]->M);
+        free(siteloglog->positions[i]);
+    }
+    free(siteloglog->positions);
+}
+
 void hyperloglog(uint b, SimpleCSVParser *parser, Structure *structure) {
     // cely web
     Hyperloglog website;
@@ -168,4 +184,6 @@ void hyperloglog(uint b, SimpleCSVParser *parser, Structure *structure) {
     
     // vypis vsech kardinalit
     print_cardinalities(&siteloglog, structure);
+    
+    free_siteloglog(&siteloglog, structure);
 }
