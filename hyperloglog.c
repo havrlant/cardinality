@@ -124,7 +124,22 @@ void init_hll(Hyperloglog *hll, uint b) {
     hll->M = (byte*) calloc(hll->m, sizeof(byte));
 }
 
-double hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
+void print_cardinalities(Hyperloglog website, Hyperloglog **sections, Hyperloglog **positions, Structure structure) {
+    uint cardinality = computeHyperCardinality(&website, computeHyperAlpha(website.m));
+    printf("Cely web: %u\n", cardinality);
+    
+    for (int i = 0; i < 2; i++) {
+        cardinality = computeHyperCardinality(sections[i], computeHyperAlpha(sections[i]->m));
+        printf("Sekce c. %i: %u\n", i + 1, cardinality);
+    }
+    
+    for (int i = 0; i < structure.length; i++) {
+        cardinality = computeHyperCardinality(positions[i], computeHyperAlpha(positions[i]->m));
+        printf("Pozice c. %i (ad_space_pk: %i): %u\n", i + 1, structure.rows[i].ad_space_pk, cardinality);
+    }
+}
+
+void hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
     // cely web
     Hyperloglog website;
     init_hll(&website, b);
@@ -152,18 +167,5 @@ double hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
     
     
     // vypis vsech kardinalit
-    uint cardinality = computeHyperCardinality(&website, computeHyperAlpha(website.m));
-    printf("Cely web: %u\n", cardinality);
-    
-    for (int i = 0; i < 2; i++) {
-        cardinality = computeHyperCardinality(sections[i], computeHyperAlpha(sections[i]->m));
-        printf("Sekce c. %i: %u\n", i + 1, cardinality);
-    }
-    
-    for (int i = 0; i < structure.length; i++) {
-        cardinality = computeHyperCardinality(positions[i], computeHyperAlpha(positions[i]->m));
-        printf("Pozice c. %i (ad_space_pk: %i): %u\n", i + 1, structure.rows[i].ad_space_pk, cardinality);
-    }
-    
-    return cardinality;
+    print_cardinalities(website, sections, positions, structure);
 }
