@@ -35,7 +35,7 @@ uint rho(const byte *digest, uint bitlength, uint bitfrom) {
  Prevede prvnich bucketBitLength bitu na cislo
  bucketIndex(1001000010, 4) = 1001 = 9
  */
-uint bucketIndex(byte *digest, Hyperloglog *hll) {
+uint bucket_index(byte *digest, Hyperloglog *hll) {
     uint64_t index;
     uint bytesHashLength = DIGEST_BIT_LENGTH / BITS_IN_BYTE;
     byte temparray[bytesHashLength];
@@ -49,7 +49,7 @@ uint bucketIndex(byte *digest, Hyperloglog *hll) {
 
 void updateM(Hyperloglog *hll, byte *digest) {
     uint j, first1;
-    j = bucketIndex(digest, hll);
+    j = bucket_index(digest, hll);
     first1 = rho(digest, DIGEST_BIT_LENGTH, hll->b);
     hll->M[j] = max(hll->M[j], first1);
 }
@@ -79,7 +79,7 @@ void fillM(SiteLoglog *siteloglog, Structure *structure, SimpleCSVParser *parser
     free(digest);
 }
 
-double applyCorrections(double E, Hyperloglog *hll) {
+double apply_corrections(double E, Hyperloglog *hll) {
     uint V = 0;
     double Estar = E;
     
@@ -101,7 +101,7 @@ double applyCorrections(double E, Hyperloglog *hll) {
     return Estar;
 }
 
-uint computeHyperCardinality(Hyperloglog *hll, double alpham) {
+uint compute_cardinality(Hyperloglog *hll, double alpham) {
     uint j;
     double E = 0;
     double sum = 0, harmonicMean;
@@ -110,11 +110,11 @@ uint computeHyperCardinality(Hyperloglog *hll, double alpham) {
     }
     harmonicMean = hll->m / sum;
     E = alpham * hll->m * harmonicMean;
-    E = applyCorrections(E, hll);
+    E = apply_corrections(E, hll);
     return (uint)E;
 }
 
-double computeHyperAlpha(unsigned int m) {
+double compute_alpha(unsigned int m) {
     return 0.7213 / (1 + 1.079 / m);
 }
 
@@ -125,19 +125,19 @@ void init_hll(Hyperloglog *hll, uint b) {
 }
 
 void print_cardinalities(SiteLoglog *siteloglog, Structure structure) {
-    double alpham = computeHyperAlpha(siteloglog->website->m);
-    uint cardinality = computeHyperCardinality(siteloglog->website, alpham);
+    double alpham = compute_alpha(siteloglog->website->m);
+    uint cardinality = compute_cardinality(siteloglog->website, alpham);
     printf("Cely web: %u\n", cardinality);
     
     for (int i = 0; i < 2; i++) {
-        alpham = computeHyperAlpha(siteloglog->sections[i]->m);
-        cardinality = computeHyperCardinality(siteloglog->sections[i], alpham);
+        alpham = compute_alpha(siteloglog->sections[i]->m);
+        cardinality = compute_cardinality(siteloglog->sections[i], alpham);
         printf("Sekce c. %i: %u\n", i + 1, cardinality);
     }
     
     for (int i = 0; i < structure.length; i++) {
-        alpham = computeHyperAlpha(siteloglog->positions[i]->m);
-        cardinality = computeHyperCardinality(siteloglog->positions[i], alpham);
+        alpham = compute_alpha(siteloglog->positions[i]->m);
+        cardinality = compute_cardinality(siteloglog->positions[i], alpham);
         printf("Pozice c. %i (ad_space_pk: %i): %u\n", i + 1, structure.rows[i].ad_space_pk, cardinality);
     }
 }

@@ -25,7 +25,7 @@ StructureRow fields_to_row(char **fields) {
     return row;
 }
 
-int compareStructureRow (const void *a, const void *b) {
+int compare_structure_row (const void *a, const void *b) {
     if (((StructureRow*)a)->ad_space_pk < ((StructureRow*)b)->ad_space_pk) {
         return -1;
     }
@@ -48,7 +48,7 @@ Structure load_structure(FILE *fd, int max_length_line) {
         }
         rows[i] = fields_to_row(parser.fields);
     }
-    qsort(rows, i, sizeof(StructureRow), compareStructureRow);
+    qsort(rows, i, sizeof(StructureRow), compare_structure_row);
     Structure s = {rows, i};
     return s;
 }
