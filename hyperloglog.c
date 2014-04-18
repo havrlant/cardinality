@@ -38,7 +38,7 @@ uint bucketIndex(byte *digest, Hyperloglog *hll) {
     uint64_t index;
     uint bytesHashLength = DIGEST_BIT_LENGTH / BITS_IN_BYTE;
     byte temparray[bytesHashLength];
-    for (int i = 0; i < bytesHashLength; i++) {
+    for (uint i = 0; i < bytesHashLength; i++) {
         temparray[bytesHashLength - i - 1]  = digest[i];
     }
     memcpy(&index, temparray, sizeof(uint64_t));
@@ -102,7 +102,7 @@ double applyCorrections(double E, Hyperloglog *hll) {
 }
 
 uint computeHyperCardinality(Hyperloglog *hll, double alpham) {
-    int j;
+    uint j;
     double E = 0;
     double sum = 0, harmonicMean;
     for (j = 0; j < hll->m; j++) {

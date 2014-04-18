@@ -61,7 +61,7 @@ StructureRow *find_row_by_ad_space_pk(Structure structure, int ad_space_pk) {
 int find_index_by_ad_space_pk(Structure structure, int ad_space_pk) {
     uint left = 0, right = structure.length - 1;
     uint middle;
-    uint temp_ad_space_pk;
+    int temp_ad_space_pk;
     while (left < right) {
         middle = (left + right) / 2;
         temp_ad_space_pk = structure.rows[middle].ad_space_pk;
