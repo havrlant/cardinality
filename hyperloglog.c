@@ -124,43 +124,39 @@ void init_hll(Hyperloglog *hll, uint b) {
     hll->M = (byte*) calloc(hll->m, sizeof(byte));
 }
 
-void print_cardinalities(SiteLoglog *siteloglog, Structure structure) {
+void print_cardinalities(SiteLoglog *siteloglog, Structure *structure) {
     double alpham = compute_alpha(siteloglog->website->m);
     uint cardinality = compute_cardinality(siteloglog->website, alpham);
     printf("Cely web: %u\n", cardinality);
     
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < structure->section_count; i++) {
         alpham = compute_alpha(siteloglog->sections[i]->m);
         cardinality = compute_cardinality(siteloglog->sections[i], alpham);
         printf("Sekce c. %i: %u\n", i + 1, cardinality);
     }
     
-    for (int i = 0; i < structure.length; i++) {
+    for (int i = 0; i < structure->length; i++) {
         alpham = compute_alpha(siteloglog->positions[i]->m);
         cardinality = compute_cardinality(siteloglog->positions[i], alpham);
-        printf("Pozice c. %i (ad_space_pk: %i): %u\n", i + 1, structure.rows[i].ad_space_pk, cardinality);
+        printf("Pozice c. %i (ad_space_pk: %i): %u\n", i + 1, structure->rows[i].ad_space_pk, cardinality);
     }
 }
 
-void hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
+void hyperloglog(uint b, SimpleCSVParser *parser, Structure *structure) {
     // cely web
     Hyperloglog website;
     init_hll(&website, b);
     
     // dve podsekce
-    int sections_count = 0;
-    for (int i = 0; i < structure.length; i++) {
-        sections_count = max(sections_count, structure.rows[i].section_id);
-    }
-    Hyperloglog **sections = (Hyperloglog**) malloc(sections_count * sizeof(Hyperloglog*));
-    for (int i = 0; i < sections_count; i++) {
+    Hyperloglog **sections = (Hyperloglog**) malloc(structure->section_count * sizeof(Hyperloglog*));
+    for (int i = 0; i < structure->section_count; i++) {
         sections[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));
         init_hll(sections[i], b - 1);
     }
     
     // jednotlive pozice
-    Hyperloglog **positions = (Hyperloglog**) malloc(structure.length * sizeof(Hyperloglog*));
-    for (int i = 0; i < structure.length; i++) {
+    Hyperloglog **positions = (Hyperloglog**) malloc(structure->length * sizeof(Hyperloglog*));
+    for (int i = 0; i < structure->length; i++) {
         positions[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));
         init_hll(positions[i], b - 2);
     }
@@ -168,7 +164,7 @@ void hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
     SiteLoglog siteloglog = {&website, sections, positions};
     
     // vypocet vsech kardinalit
-    fillM(&siteloglog, &structure, parser);
+    fillM(&siteloglog, structure, parser);
     
     // vypis vsech kardinalit
     print_cardinalities(&siteloglog, structure);

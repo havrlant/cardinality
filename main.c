@@ -36,6 +36,6 @@ int main(int argc, const char * argv[])
     Structure structure = load_structure(structure_file, 200);
     SimpleCSVParser parser;
     init_parser(&parser, data_file, 200, 10);
-    hyperloglog(b, &parser, structure);
+    hyperloglog(b, &parser, &structure);
     return 0;
 }

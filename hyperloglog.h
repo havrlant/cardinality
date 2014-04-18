@@ -23,6 +23,6 @@ typedef struct{
     Hyperloglog **positions;
 } SiteLoglog;
 
-void hyperloglog(uint b, SimpleCSVParser *parser, Structure structure);
+void hyperloglog(uint b, SimpleCSVParser *parser, Structure *structure);
 
 #endif

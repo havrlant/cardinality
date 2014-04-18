@@ -49,8 +49,13 @@ Structure load_structure(FILE *fd, int max_length_line) {
         rows[i] = fields_to_row(parser.fields);
     }
     qsort(rows, i, sizeof(StructureRow), compare_structure_row);
-    Structure s = {rows, i};
-    return s;
+    
+    int sections_count = 0;
+    for (int j = 0; j < i; j++) {
+        sections_count = fmax(sections_count, rows[j].section_id);
+    }
+    
+    return (Structure){rows, i, sections_count};
 }
 
 StructureRow *find_row_by_ad_space_pk(Structure *structure, int ad_space_pk) {

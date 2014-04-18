@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "simpleCSV.h"
 #include "declarations.h"
 
@@ -17,6 +18,7 @@ typedef struct {
 typedef struct {
     StructureRow *rows;
     int length;
+    int section_count;
 } Structure;
 
 Structure load_structure(FILE *fd, int max_length_line);
