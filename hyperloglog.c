@@ -53,7 +53,7 @@ void update_M(Hyperloglog *hll, byte *digest) {
     hll->M[j] = max(hll->M[j], first1);
 }
 
-void computeMaxes(Hyperloglog *website, Hyperloglog **sections, Hyperloglog **positions, Structure structure, SimpleCSVParser *parser) {
+void fillM(Hyperloglog *website, Hyperloglog **sections, Hyperloglog **positions, Structure structure, SimpleCSVParser *parser) {
     StructureRow *srow;
     int index;
     char *word;
@@ -163,8 +163,7 @@ void hyperloglog(uint b, SimpleCSVParser *parser, Structure structure) {
     }
     
     // vypocet vsech kardinalit
-    computeMaxes(&website, sections, positions, structure, parser);
-    
+    fillM(&website, sections, positions, structure, parser);
     
     // vypis vsech kardinalit
     print_cardinalities(website, sections, positions, structure);
