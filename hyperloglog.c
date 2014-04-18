@@ -46,7 +46,7 @@ uint bucketIndex(byte *digest, Hyperloglog *hll) {
     return (uint)index;
 }
 
-void update_M(Hyperloglog *hll, byte *digest) {
+void updateM(Hyperloglog *hll, byte *digest) {
     uint j, first1;
     j = bucketIndex(digest, hll);
     first1 = rho(digest, DIGEST_BIT_LENGTH, hll->b);
@@ -63,18 +63,18 @@ void fillM(Hyperloglog *website, Hyperloglog **sections, Hyperloglog **positions
         str2md5(word, digest);
         
         // cely web
-        update_M(website, digest);
+        updateM(website, digest);
         
         // jednotlive sekce
         int ad_space_pk = atoi(parser->fields[AD_SPACE_PK_INDEX]);
         srow = find_row_by_ad_space_pk(structure, ad_space_pk);
         index = srow->section_id - 1;
-        update_M(sections[index], digest);
+        updateM(sections[index], digest);
         
         // jednotlive pozice
         // index = ((ad_space_pk == 89229) ? 15 : ad_space_pk - 89202);
         index = find_index_by_ad_space_pk(structure, ad_space_pk);
-        update_M(positions[index], digest);
+        updateM(positions[index], digest);
     }
     free(digest);
 }
