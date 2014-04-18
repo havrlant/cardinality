@@ -16,8 +16,11 @@ void print_row(StructureRow row) {
 }
 
 StructureRow fields_to_row(char **fields) {
+    char *temp;
     StructureRow row;
-    row.ad_space_pk = atoi(copy_string(fields[0]));
+    temp = copy_string(fields[0]);
+    row.ad_space_pk = atoi(temp);
+    free(temp);
     row.site_id = copy_string(fields[1]);
     row.section_id = atoi(fields[2]);
     row.position_id = copy_string(fields[3]);
@@ -59,6 +62,11 @@ Structure load_structure(FILE *fd, int max_length_line) {
 }
 
 void free_structure(Structure *structure) {
+    for (int i = 0; i < structure->length; i++) {
+        free(structure->rows[i].site_id);
+        free(structure->rows[i].position_id);
+        free(structure->rows[i].position_bannertype_id);
+    }
     free(structure->rows);
 }
 
