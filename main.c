@@ -3,6 +3,7 @@
 #include "structure.h"
 #include "hyperloglog.h"
 #include "declarations.h"
+#include "set.h"
 
 FILE* try_fopen(const char *path) {
     FILE* fd = fopen(path, "r");
