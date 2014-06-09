@@ -4,4 +4,6 @@
 typedef unsigned char byte;
 typedef unsigned int uint;
 
+const int BITS_IN_BYTE;
+
 #endif
