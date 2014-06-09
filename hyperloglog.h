@@ -10,6 +10,8 @@
 #include "md5.h"
 #include "structure.h"
 #include "simpleCSV.h"
+#include "data.h"
+#include "assert.h"
 
 typedef struct {
     uint b;

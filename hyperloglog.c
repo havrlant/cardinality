@@ -9,6 +9,24 @@ uint max(uint a, uint b) {
 }
 
 /*
+uint get_threshold(uint b) {
+    return tresholds[b - 4];
+}
+
+double estimate_bias(double E, uint b) {
+    for (int i = 1; i < 200; i++) {
+        if (raw_estimate_data[b - 4][i] > E) {
+            return ((raw_estimate_data[b - 4][i] - bias_data[b - 4][i]) + (raw_estimate_data[b - 4][i - 1] - bias_data[b - 4][i - 1])) / 2.0;
+        }
+    }
+    return 0;
+}*/
+
+double linear_counting(uint m, uint V) {
+    return m * log2((double)m / (double)V);
+}
+
+/*
  Vrati pozici nejlevejsiho bitu, ktery je roven 1.
  Zacina hledat od index bitfrom. Indexuje se od 1.
  rho(1001000010, 10, 4) = 6
@@ -78,18 +96,24 @@ void fillM(SiteLoglog *siteloglog, Structure *structure, SimpleCSVParser *parser
     free(digest);
 }
 
+uint count_zero_buckets(Hyperloglog *hll) {
+    uint count = 0;
+    for (int i = 0; i < hll->m; i++) {
+        if (hll->M[i] == 0) {
+            count++;
+        }
+    }
+    return count;
+}
+
 double apply_corrections(double E, Hyperloglog *hll) {
     uint V = 0;
     double Estar = E;
     
     if (E <= (2.5 * hll->m)) {
-        for (uint i = 0; i < hll->m; i++) {
-            if (hll->M[i] == 0) {
-                V++;
-            }
-        }
+        V = count_zero_buckets(hll);
         if (V != 0) {
-            Estar = hll->m * log2(hll->m / (double)V);
+            Estar = linear_counting(hll->m, V);
         }
     }
     
@@ -99,6 +123,28 @@ double apply_corrections(double E, Hyperloglog *hll) {
     }
     return Estar;
 }
+
+/*double hllplus(double E, Hyperloglog *hll) {
+    double E_, H;
+    if (E <= (5 * hll->m)) {
+        E_ = E - estimate_bias(E, hll->b);
+    } else {
+        E_ = E;
+    }
+    
+    uint V = count_zero_buckets(hll);
+    if (V != 0) {
+        H = linear_counting(hll->m, V);
+    } else {
+        H = E_;
+    }
+    
+    if (H <= get_threshold(hll->b)) {
+        return H;
+    } else {
+        return E_;
+    }
+}*/
 
 uint compute_cardinality(Hyperloglog *hll, double alpham) {
     uint j;
@@ -110,6 +156,7 @@ uint compute_cardinality(Hyperloglog *hll, double alpham) {
     harmonicMean = hll->m / sum;
     E = alpham * hll->m * harmonicMean;
     E = apply_corrections(E, hll);
+    // E = hllplus(E, hll);
     return (uint)E;
 }
 
@@ -158,6 +205,8 @@ void free_siteloglog(SiteLoglog *siteloglog, Structure *structure) {
 }
 
 void hyperloglog(uint b, SimpleCSVParser *parser, Structure *structure) {
+    assert(b <= 18);
+    
     // cely web
     Hyperloglog website;
     init_hll(&website, b);
@@ -166,14 +215,14 @@ void hyperloglog(uint b, SimpleCSVParser *parser, Structure *structure) {
     Hyperloglog **sections = (Hyperloglog**) malloc(structure->section_count * sizeof(Hyperloglog*));
     for (int i = 0; i < structure->section_count; i++) {
         sections[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));
-        init_hll(sections[i], b - 1);
+        init_hll(sections[i], b);
     }
     
     // jednotlive pozice
     Hyperloglog **positions = (Hyperloglog**) malloc(structure->length * sizeof(Hyperloglog*));
     for (int i = 0; i < structure->length; i++) {
         positions[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));
-        init_hll(positions[i], b - 2);
+        init_hll(positions[i], b);
     }
     
     SiteLoglog siteloglog = {&website, sections, positions};
