@@ -12,12 +12,8 @@
 #include "simpleCSV.h"
 #include "data.h"
 #include "assert.h"
-
-typedef struct {
-    uint b;
-    uint m;
-    byte *M;
-} Hyperloglog;
+#include "hlldictionary.h"
+#include "dstats.h"
 
 typedef struct{
     Hyperloglog *website;
@@ -25,6 +21,7 @@ typedef struct{
     Hyperloglog **positions;
 } SiteLoglog;
 
-void hyperloglog(uint b, SimpleCSVParser *parser, Structure *structure);
+void hyperloglog(uint b, SimpleCSVParser *parser);
+double linear_counting(uint m, uint V);
 
 #endif

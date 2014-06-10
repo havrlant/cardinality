@@ -8,7 +8,7 @@ uint max(uint a, uint b) {
     return a > b ? a : b;
 }
 
-/*
+
 uint get_threshold(uint b) {
     return tresholds[b - 4];
 }
@@ -20,9 +20,11 @@ double estimate_bias(double E, uint b) {
         }
     }
     return 0;
-}*/
+}
 
 double linear_counting(uint m, uint V) {
+    // return m * log2((double)m / (double)V);
+    // printf("m: %u, V: %u, %g\n", m, V, log2((double)m / (double)V + 1));
     return m * log2((double)m / (double)V);
 }
 
@@ -71,7 +73,7 @@ void updateM(Hyperloglog *hll, byte *digest) {
     hll->M[j] = max(hll->M[j], first1);
 }
 
-void fillM(SiteLoglog *siteloglog, Structure *structure, SimpleCSVParser *parser) {
+/*void fillM(SiteLoglog *siteloglog, Structure *structure, SimpleCSVParser *parser) {
     StructureRow *srow;
     int index;
     char *word;
@@ -94,7 +96,7 @@ void fillM(SiteLoglog *siteloglog, Structure *structure, SimpleCSVParser *parser
         updateM(siteloglog->positions[index], digest);
     }
     free(digest);
-}
+}*/
 
 uint count_zero_buckets(Hyperloglog *hll) {
     uint count = 0;
@@ -114,13 +116,16 @@ double apply_corrections(double E, Hyperloglog *hll) {
         V = count_zero_buckets(hll);
         if (V != 0) {
             Estar = linear_counting(hll->m, V);
+            // printf("E: %g Estar: %g, V: %u\n", E, Estar, V);
         }
     }
     
-    double bound = pow(2, 32);
+    // printf("%g, %g, %i \n", E, Estar, V);
+    
+    /*double bound = pow(2, 32);
     if (E > bound / 30) {
         Estar = -bound * log2(1 - E / bound);
-    }
+    }*/
     return Estar;
 }
 
@@ -134,7 +139,9 @@ double apply_corrections(double E, Hyperloglog *hll) {
     
     uint V = count_zero_buckets(hll);
     if (V != 0) {
+        double nonzero = (double)(hll->m - V);
         H = linear_counting(hll->m, V);
+        printf("E: %g, E_: %g, LC: %g, V: %i, rozdil: %i, odhad: %g\n", E, E_, H, V, hll->m - V, (hll->m - V) * log2(nonzero / hll->m + 2));
     } else {
         H = E_;
     }
@@ -204,34 +211,44 @@ void free_siteloglog(SiteLoglog *siteloglog, Structure *structure) {
     free(siteloglog->positions);
 }
 
-void hyperloglog(uint b, SimpleCSVParser *parser, Structure *structure) {
-    assert(b <= 18);
+Hyperloglog *create_hll(uint b) {
+    Hyperloglog *hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
+    init_hll(hll, b);
+    return hll;
+}
+
+// hash tabulky
+
+void hyperloglog(uint b, SimpleCSVParser *parser) {
+    HllDictionary *hash_table = create_empty_hll_dict();
+    Dstats stats;
+    HllDictionary *temp_item;
+    Hyperloglog *hll;
+    byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
     
-    // cely web
-    Hyperloglog website;
-    init_hll(&website, b);
-    
-    // dve podsekce
-    Hyperloglog **sections = (Hyperloglog**) malloc(structure->section_count * sizeof(Hyperloglog*));
-    for (int i = 0; i < structure->section_count; i++) {
-        sections[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));
-        init_hll(sections[i], b);
+    while (next_line(parser)) {
+        parse_line(parser->fields, &stats);
+        if (strcmp("0", stats.uuid) == 0) {
+            continue;
+        }
+        temp_item = find_hll(stats.id_server, &hash_table);
+        if (temp_item == NULL) {
+            hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
+            init_hll(hll, b);
+            add_hll(stats.id_server, hll, &hash_table);
+        } else {
+            hll = temp_item->hll;
+        }
+        printf("%s\n", stats.uuid);
+        str2md5(stats.uuid, digest);
+        updateM(hll, digest);
     }
     
-    // jednotlive pozice
-    Hyperloglog **positions = (Hyperloglog**) malloc(structure->length * sizeof(Hyperloglog*));
-    for (int i = 0; i < structure->length; i++) {
-        positions[i] = (Hyperloglog*) malloc(sizeof(Hyperloglog));
-        init_hll(positions[i], b);
+    HllDictionary *s;
+    uint card;
+    for(s = hash_table; s != NULL; s = s->hh.next) {
+        // printf("user id %d\n", s->hash_id);
+        card = compute_cardinality(s->hll, compute_alpha(s->hll->m));
+        // printf("ID_SERVER: %i, kard: %u\n", s->hash_id, card);
     }
-    
-    SiteLoglog siteloglog = {&website, sections, positions};
-    
-    // vypocet vsech kardinalit
-    fillM(&siteloglog, structure, parser);
-    
-    // vypis vsech kardinalit
-    print_cardinalities(&siteloglog, structure);
-    
-    free_siteloglog(&siteloglog, structure);
 }

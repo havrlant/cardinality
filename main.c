@@ -3,7 +3,10 @@
 #include "structure.h"
 #include "hyperloglog.h"
 #include "declarations.h"
-#include "set.h"
+#include "tests/unittests.h"
+#include "uthash.h"
+#include "dstats.h"
+#include "hlldictionary.h"
 
 FILE* try_fopen(const char *path) {
     FILE* fd = fopen(path, "r");
@@ -14,9 +17,12 @@ FILE* try_fopen(const char *path) {
     return fd;
 }
 
+
+
+
 int main(int argc, const char * argv[])
 {
-    if (argc < 3) {
+    /*if (argc < 3) {
         printf("Malo parametru. Pouziti:\n");
         printf("cardinality <structure_file> <data_file> [<b>]\n");
         exit(EXIT_FAILURE);
@@ -32,7 +38,7 @@ int main(int argc, const char * argv[])
     }
     
     FILE *structure_file = try_fopen(argv[1]);
-    FILE *data_file = try_fopen(argv[2]);    
+    FILE *data_file = try_fopen(argv[2]);
     
     Structure structure = load_structure(structure_file, 200);
     SimpleCSVParser parser;
@@ -40,6 +46,12 @@ int main(int argc, const char * argv[])
     hyperloglog(b, &parser, &structure);
     free_structure(&structure);
     fclose(structure_file);
-    fclose(data_file);
+    fclose(data_file);*/
+    
+    
+    SimpleCSVParser parser;
+    init_parser(&parser, try_fopen("/Users/lukashavrlant/Dropbox/share/23371828.csv"), 1000, 29, '\t');
+    hyperloglog(14, &parser);
+    
     return 0;
 }

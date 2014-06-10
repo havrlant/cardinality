@@ -38,7 +38,7 @@ int compare_structure_row (const void *a, const void *b) {
     return 0;
 }
 
-Structure load_structure(FILE *fd, int max_length_line) {
+/*Structure load_structure(FILE *fd, int max_length_line) {
     int buffsize = 20;
     StructureRow *rows = (StructureRow*) malloc(sizeof(StructureRow) * buffsize);
     SimpleCSVParser parser;
@@ -59,7 +59,7 @@ Structure load_structure(FILE *fd, int max_length_line) {
     }
     
     return (Structure){rows, i, sections_count};
-}
+}*/
 
 void free_structure(Structure *structure) {
     for (int i = 0; i < structure->length; i++) {
