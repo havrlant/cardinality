@@ -1,21 +1,20 @@
 #include "setdictionary.h"
 
-HllDictionary *create_empty_set_dict() {
-    HllDictionary *hll = NULL;
+SetDictionary *create_empty_set_dict() {
+    SetDictionary *hll = NULL;
     return hll;
 }
 
-void add_set_to_dict(uint id, Set *set, HllDictionary **dict) {
-    HllDictionary *s;
-    s = malloc(sizeof(HllDictionary));
+void add_set_to_dict(uint id, Set set, SetDictionary **dict) {
+    SetDictionary *s;
+    s = malloc(sizeof(SetDictionary));
     s->hash_id = id;
     s->set = set;
     HASH_ADD_INT(*dict, hash_id, s);
 }
 
-HllDictionary *find_set_in_dict(uint id, HllDictionary **dict) {
-    HllDictionary *s;
+SetDictionary *find_set_in_dict(uint id, SetDictionary **dict) {
+    SetDictionary *s;
     HASH_FIND_INT(*dict, &id, s);
     return s;
 }
-

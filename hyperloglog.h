@@ -14,6 +14,8 @@
 #include "assert.h"
 #include "hlldictionary.h"
 #include "dstats.h"
+#include "setdictionary.h"
+#include "set.h"
 
 typedef struct{
     Hyperloglog *website;

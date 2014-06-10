@@ -3,6 +3,8 @@
 const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
+const uint BITSET_EXPONENT = 18;
+const uint BITSET_SIZE = 1 << BITSET_EXPONENT;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -51,10 +53,10 @@ uint rho(const byte *digest, uint bitlength, uint bitfrom) {
 
 
 /*
- Prevede prvnich bucketBitLength bitu na cislo
+ Prevede prvnich b bitu na cislo
  bucketIndex(1001000010, 4) = 1001 = 9
  */
-uint bucket_index(byte *digest, Hyperloglog *hll) {
+uint bucket_index(byte *digest, uint b) {
     uint64_t index;
     uint bytesHashLength = DIGEST_BIT_LENGTH / BITS_IN_BYTE;
     byte temparray[bytesHashLength];
@@ -62,13 +64,13 @@ uint bucket_index(byte *digest, Hyperloglog *hll) {
         temparray[bytesHashLength - i - 1]  = digest[i];
     }
     memcpy(&index, temparray, sizeof(uint64_t));
-    index = index >> (DIGEST_BIT_LENGTH - hll->b);
+    index = index >> (DIGEST_BIT_LENGTH - b);
     return (uint)index;
 }
 
 void updateM(Hyperloglog *hll, byte *digest) {
     uint j, first1;
-    j = bucket_index(digest, hll);
+    j = bucket_index(digest, hll->b);
     first1 = rho(digest, DIGEST_BIT_LENGTH, hll->b);
     hll->M[j] = max(hll->M[j], first1);
 }
@@ -220,35 +222,46 @@ Hyperloglog *create_hll(uint b) {
 // hash tabulky
 
 void hyperloglog(uint b, SimpleCSVParser *parser) {
-    HllDictionary *hash_table = create_empty_hll_dict();
+    HllDictionary *hlls_table = create_empty_hll_dict();
+    SetDictionary *sets_table = create_empty_set_dict();
     Dstats stats;
     HllDictionary *temp_item;
     Hyperloglog *hll;
+    Set set;
     byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
     
     while (next_line(parser)) {
         parse_line(parser->fields, &stats);
+        // tohle zatim nebudeme pocitat -- dohodnout se s Vlkem
         if (strcmp("0", stats.uuid) == 0) {
             continue;
         }
-        temp_item = find_hll(stats.id_server, &hash_table);
+        
+        temp_item = find_hll(stats.id_server, &hlls_table);
         if (temp_item == NULL) {
             hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
             init_hll(hll, b);
-            add_hll(stats.id_server, hll, &hash_table);
+            add_hll(stats.id_server, hll, &hlls_table);
+            
+            set = create_set(BITSET_SIZE); // 2^18
+            add_set_to_dict(stats.id_server, set, &sets_table);
         } else {
             hll = temp_item->hll;
+            set = find_set_in_dict(stats.id_server, &sets_table)->set;
         }
-        printf("%s\n", stats.uuid);
         str2md5(stats.uuid, digest);
         updateM(hll, digest);
+        set_element(set, bucket_index(digest, BITSET_EXPONENT));
     }
     
-    HllDictionary *s;
+    SetDictionary *s;
     uint card;
-    for(s = hash_table; s != NULL; s = s->hh.next) {
-        // printf("user id %d\n", s->hash_id);
+    /*for(s = hlls_table; s != NULL; s = s->hh.next) {
         card = compute_cardinality(s->hll, compute_alpha(s->hll->m));
-        // printf("ID_SERVER: %i, kard: %u\n", s->hash_id, card);
+        printf("ID_SERVER: %i, kard: %u\n", s->hash_id, card);
+    }*/
+    for (s = sets_table; s != NULL; s = s->hh.next) {
+        card = elements_count(s->set, BITSET_SIZE);
+        printf("ID_SERVER: %i, kard: %u\n", s->hash_id, card);
     }
 }
