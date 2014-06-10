@@ -5,6 +5,7 @@ const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const uint BITSET_EXPONENT = 18;
 const uint BITSET_SIZE = 1 << BITSET_EXPONENT;
+const uint BITSET_LIMIT = 1 << (BITSET_EXPONENT - 4);
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -255,13 +256,14 @@ void hyperloglog(uint b, SimpleCSVParser *parser) {
     }
     
     SetDictionary *s;
+    HllDictionary *h;
     uint card;
-    /*for(s = hlls_table; s != NULL; s = s->hh.next) {
-        card = compute_cardinality(s->hll, compute_alpha(s->hll->m));
-        printf("ID_SERVER: %i, kard: %u\n", s->hash_id, card);
-    }*/
     for (s = sets_table; s != NULL; s = s->hh.next) {
-        card = elements_count(s->set, BITSET_SIZE);
-        printf("ID_SERVER: %i, kard: %u\n", s->hash_id, card);
+        card = elements_count(s->set, BITSET_SIZE); // pridat LC
+        if (card > BITSET_LIMIT) {
+            h = find_hll(s->hash_id, &hlls_table);
+            card = compute_cardinality(h->hll, compute_alpha(h->hll->m));
+        }
+        printf("SERVER_ID: %u, cardinality: %u\n", s->hash_id, card);
     }
 }

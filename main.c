@@ -51,7 +51,7 @@ int main(int argc, const char * argv[])
     
     SimpleCSVParser parser;
     init_parser(&parser, try_fopen("/Users/lukashavrlant/Dropbox/share/23371828.csv"), 1000, 29, '\t');
-    hyperloglog(14, &parser);
+    hyperloglog(10, &parser);
     
     return 0;
 }
