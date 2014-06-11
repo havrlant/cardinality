@@ -113,7 +113,7 @@ void print_results(HllDictionary *hlls_table, SetDictionary *sets_table) {
             h = find_hll(s->hash_id, &hlls_table);
             card = compute_cardinality(h->hll, compute_alpha(h->hll->m));
         }
-        printf("%s, cardinality: %u\n", s->hash_id, card);
+        printf("'%s' : %u\n", s->hash_id, card);
     }
 }
 
@@ -142,11 +142,9 @@ char *create_hash_id(View view, char** fields) {
         newstring[j++] = ':';
         memcpy(&newstring[j], fields[index], strlen(fields[index]) * sizeof(char));
         j += strlen(fields[index]);
-        if (i != (view.fields_count - 1)) {
-            newstring[j++] = ',';
-        }
+        newstring[j++] = ',';
     }
-    newstring[j] = '\0';
+    newstring[j - 1] = '\0';
     return newstring;
 }
 
