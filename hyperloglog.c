@@ -304,12 +304,13 @@ void hyperloglog(uint b, const char *path) {
 		}
         
         if (file.name[0] != '.') {
-            printf("%s\n", file.path);
+            printf("Zpracovavam soubor: %s\n", file.path);
+            process_file(file.path, &hlls_table, &sets_table, b, digest);
         }
 
 		tinydir_next(&dir);
 	}
     
-    // process_file(path, &hlls_table, &sets_table, b, digest);
-    // print_results(hlls_table, sets_table);
+    process_file(path, &hlls_table, &sets_table, b, digest);
+    print_results(hlls_table, sets_table);
 }
