@@ -128,7 +128,7 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
     init_parser(&parser, try_fopen(path), 1000, 29, '\t');
     while (next_line(&parser)) {
         parse_line(parser.fields, &stats);
-        // tohle zatim nebudeme pocitat -- dohodnout se s Vlkem
+        // tohle zatim nebudeme pocitat
         if (strcmp("0", stats.uuid) == 0) {
             continue;
         }
@@ -152,19 +152,12 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
     free_parser(&parser);
 }
 
-void hyperloglog(uint b, const char *path) {
+void init_constants() {
     BITSET_SIZE = 1 << BITSET_EXPONENT;
     BITSET_LIMIT = 1 << (BITSET_EXPONENT - 2);
-    
-    HllDictionary *hlls_table = create_empty_hll_dict();
-    SetDictionary *sets_table = create_empty_set_dict();
-    tinydir_dir dir;
-    
-    if (tinydir_open(&dir, path) == -1) {
-        perror("Error opening file");
-        return;
-    }
-    
+}
+
+void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, SetDictionary **sets_table, uint b) {
     while (dir.has_next) {
         tinydir_file file;
         if (tinydir_readfile(&dir, &file) == -1) {
@@ -174,12 +167,29 @@ void hyperloglog(uint b, const char *path) {
         
         if (file.name[0] != '.') {
             printf("Zpracovavam soubor: %s\n", file.path);
-            process_file(file.path, &hlls_table, &sets_table, b);
+            process_file(file.path, hlls_table, sets_table, b);
         }
-
+        
 		tinydir_next(&dir);
 	}
+}
+
+int try_open_dir(tinydir_dir *dir, const char* path) {
+    if (tinydir_open(dir, path) == -1) {
+        perror("Error opening file");
+        return 0;
+    }
+    return 1;
+}
+
+void hyperloglog(uint b, const char *path) {
+    init_constants();
+    HllDictionary *hlls_table = create_empty_hll_dict();
+    SetDictionary *sets_table = create_empty_set_dict();
+    tinydir_dir dir;
     
-    process_file(path, &hlls_table, &sets_table, b);
-    print_results(hlls_table, sets_table);
+    if (try_open_dir(&dir, path)) {
+        process_all_files(dir, &hlls_table, &sets_table, b);
+        print_results(hlls_table, sets_table);
+    }
 }
