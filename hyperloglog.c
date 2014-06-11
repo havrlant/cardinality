@@ -12,7 +12,7 @@ uint max(uint a, uint b) {
 }
 
 double linear_counting(uint m, uint V) {
-    return m * log2((double)m / (double)V);
+    return m * log((double)m / (double)V);
 }
 
 /*
@@ -67,7 +67,6 @@ double apply_corrections(double E, Hyperloglog *hll) {
         V = count_zero_buckets(hll);
         if (V != 0) {
             Estar = linear_counting(hll->m, V);
-            // printf("E: %g Estar: %g, V: %u\n", E, Estar, V);
         }
     }
 
@@ -109,6 +108,7 @@ void print_results(HllDictionary *hlls_table, SetDictionary *sets_table) {
     uint card;
     for (s = sets_table; s != NULL; s = s->hh.next) {
         card = elements_count(s->set, BITSET_SIZE); // pridat Linear Counting
+        card = linear_counting(BITSET_SIZE, BITSET_SIZE - card);
         if (card > BITSET_LIMIT) {
             h = find_hll(s->hash_id, &hlls_table);
             card = compute_cardinality(h->hll, compute_alpha(h->hll->m));
@@ -134,10 +134,10 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
         }
         
         temp_item = find_hll(stats.id_server, hlls_table);
+        
         if (temp_item == NULL) {
             hll = create_hll(b);
             add_hll(stats.id_server, hll, hlls_table);
-            
             set = create_set(BITSET_SIZE);
             add_set_to_dict(stats.id_server, set, sets_table);
         } else {
