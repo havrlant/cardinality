@@ -275,19 +275,19 @@ void hyperloglog(uint b, const char *path) {
     byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
     tinydir_dir dir;
     
-	if (tinydir_open(&dir, path) == -1) {
-		perror("Error opening file");
+    if (tinydir_open(&dir, path) == -1) {
+        perror("Error opening file");
         return;
-	}
+    }
     
     while (dir.has_next)
-	{
-		tinydir_file file;
-		if (tinydir_readfile(&dir, &file) == -1)
+    {
+        tinydir_file file;
+        if (tinydir_readfile(&dir, &file) == -1)
 		{
-			perror("Error getting file");
+            perror("Error getting file");
             return;
-		}
+        }
         
         if (file.name[0] != '.') {
             printf("Zpracovavam soubor: %s\n", file.path);
