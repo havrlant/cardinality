@@ -4,8 +4,8 @@ const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const uint BITSET_EXPONENT = 18;
-uint BITSET_SIZE = 1 << BITSET_EXPONENT;
-uint BITSET_LIMIT = 1 << (BITSET_EXPONENT - 4);
+uint BITSET_SIZE;
+uint BITSET_LIMIT;
 
 FILE* try_fopen(const char *path) {
     FILE* fd = fopen(path, "r");
@@ -281,6 +281,9 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
 }
 
 void hyperloglog(uint b, const char *path) {
+    BITSET_SIZE = 1 << BITSET_EXPONENT;
+    BITSET_LIMIT = 1 << (BITSET_EXPONENT - 4);
+    
     HllDictionary *hlls_table = create_empty_hll_dict();
     SetDictionary *sets_table = create_empty_set_dict();
     byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);

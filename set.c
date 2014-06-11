@@ -38,7 +38,7 @@ uint is_element(Set set, uint index) {
 uint elements_count(Set set, uint maximum_elements_count) {
     uint count = 0;
     uint arr_size = array_size(maximum_elements_count);
-    for (int i = 0; i < arr_size; i++) {
+    for (uint i = 0; i < arr_size; i++) {
         count += elements_count_in_single_cell(set, i);
     }
     return count;
