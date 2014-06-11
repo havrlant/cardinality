@@ -32,19 +32,16 @@ double linear_counting(uint m, uint V) {
  rho(1001000010, 10, 4) = 6
  ^
  */
-uint rho(const byte *digest, uint bitlength, uint bitfrom) {
-    uint b = 0;
-    uint byteIdx = 0;
-    uint bitIdx = 0;
-    for (b = bitfrom; b < bitlength; b++) {
-        byteIdx = b / BITS_IN_BYTE;
-        bitIdx  = (BITS_IN_BYTE - 1) - b % BITS_IN_BYTE;
-        if ((digest[byteIdx] & (1 << bitIdx)) != 0) {
-            return (b - bitfrom + 1);
+uint rho(uint64_t digest, uint bitlength, uint bitfrom) {
+    uint64_t base_mask = ((uint64_t) 1) << 63;
+    uint64_t mask;
+    for (uint64_t i = bitfrom; i < 64; i++) {
+        mask = base_mask >> i;
+        if ((mask & digest) == mask) {
+            return (uint)i - bitfrom + (uint)1;
         }
     }
-    
-    return (bitlength-bitfrom) + 1;
+    return 0;
 }
 
 
@@ -52,49 +49,16 @@ uint rho(const byte *digest, uint bitlength, uint bitfrom) {
  Prevede prvnich b bitu na cislo
  bucketIndex(1001000010, 4) = 1001 = 9
  */
-uint bucket_index(byte *digest, uint b) {
-    uint64_t index;
-    uint bytesHashLength = DIGEST_BIT_LENGTH / BITS_IN_BYTE;
-    byte temparray[bytesHashLength];
-    for (uint i = 0; i < bytesHashLength; i++) {
-        temparray[bytesHashLength - i - 1]  = digest[i];
-    }
-    memcpy(&index, temparray, sizeof(uint64_t));
-    index = index >> (DIGEST_BIT_LENGTH - b);
-    return (uint)index;
+uint bucket_index(uint64_t digest, uint b) {
+    return (uint)(digest >> (uint64_t)(64 - b));
 }
 
-void updateM(Hyperloglog *hll, byte *digest) {
+void updateM(Hyperloglog *hll, uint64_t digest) {
     uint j, first1;
     j = bucket_index(digest, hll->b);
     first1 = rho(digest, DIGEST_BIT_LENGTH, hll->b);
     hll->M[j] = max(hll->M[j], first1);
 }
-
-/*void fillM(SiteLoglog *siteloglog, Structure *structure, SimpleCSVParser *parser) {
-    StructureRow *srow;
-    int index;
-    char *word;
-    byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
-    while (next_line(parser)) {
-        word = parser->fields[USER_PK_INDEX];
-        str2md5(word, digest);
-        
-        // cely web
-        updateM(siteloglog->website, digest);
-        
-        // jednotlive sekce
-        int ad_space_pk = atoi(parser->fields[AD_SPACE_PK_INDEX]);
-        srow = find_row_by_ad_space_pk(structure, ad_space_pk);
-        index = srow->section_id - 1;
-        updateM(siteloglog->sections[index], digest);
-        
-        // jednotlive pozice
-        index = find_index_by_ad_space_pk(structure, ad_space_pk);
-        updateM(siteloglog->positions[index], digest);
-    }
-    free(digest);
-}*/
 
 uint count_zero_buckets(Hyperloglog *hll) {
     uint count = 0;
@@ -117,39 +81,9 @@ double apply_corrections(double E, Hyperloglog *hll) {
             // printf("E: %g Estar: %g, V: %u\n", E, Estar, V);
         }
     }
-    
-    // printf("%g, %g, %i \n", E, Estar, V);
-    
-    /*double bound = pow(2, 32);
-    if (E > bound / 30) {
-        Estar = -bound * log2(1 - E / bound);
-    }*/
+
     return Estar;
 }
-
-/*double hllplus(double E, Hyperloglog *hll) {
-    double E_, H;
-    if (E <= (5 * hll->m)) {
-        E_ = E - estimate_bias(E, hll->b);
-    } else {
-        E_ = E;
-    }
-    
-    uint V = count_zero_buckets(hll);
-    if (V != 0) {
-        double nonzero = (double)(hll->m - V);
-        H = linear_counting(hll->m, V);
-        printf("E: %g, E_: %g, LC: %g, V: %i, rozdil: %i, odhad: %g\n", E, E_, H, V, hll->m - V, (hll->m - V) * log2(nonzero / hll->m + 2));
-    } else {
-        H = E_;
-    }
-    
-    if (H <= get_threshold(hll->b)) {
-        return H;
-    } else {
-        return E_;
-    }
-}*/
 
 uint compute_cardinality(Hyperloglog *hll, double alpham) {
     uint j;
@@ -161,7 +95,6 @@ uint compute_cardinality(Hyperloglog *hll, double alpham) {
     harmonicMean = hll->m / sum;
     E = alpham * hll->m * harmonicMean;
     E = apply_corrections(E, hll);
-    // E = hllplus(E, hll);
     return (uint)E;
 }
 
@@ -175,47 +108,11 @@ void init_hll(Hyperloglog *hll, uint b) {
     hll->M = (byte*) calloc(hll->m, sizeof(byte));
 }
 
-void print_cardinalities(SiteLoglog *siteloglog, Structure *structure) {
-    double alpham = compute_alpha(siteloglog->website->m);
-    uint cardinality = compute_cardinality(siteloglog->website, alpham);
-    printf("Cely web: %u\n", cardinality);
-    
-    for (int i = 0; i < structure->section_count; i++) {
-        alpham = compute_alpha(siteloglog->sections[i]->m);
-        cardinality = compute_cardinality(siteloglog->sections[i], alpham);
-        printf("Sekce c. %i: %u\n", i + 1, cardinality);
-    }
-    
-    for (int i = 0; i < structure->length; i++) {
-        alpham = compute_alpha(siteloglog->positions[i]->m);
-        cardinality = compute_cardinality(siteloglog->positions[i], alpham);
-        printf("Pozice c. %i (ad_space_pk: %i): %u\n", i + 1, structure->rows[i].ad_space_pk, cardinality);
-    }
-}
-
-void free_siteloglog(SiteLoglog *siteloglog, Structure *structure) {
-    free(siteloglog->website->M);
-    
-    for (int i = 0; i < structure->section_count; i++) {
-        free(siteloglog->sections[i]->M);
-        free(siteloglog->sections[i]);
-    }
-    free(siteloglog->sections);
-    
-    for (int i = 0; i < structure->length; i++) {
-        free(siteloglog->positions[i]->M);
-        free(siteloglog->positions[i]);
-    }
-    free(siteloglog->positions);
-}
-
 Hyperloglog *create_hll(uint b) {
     Hyperloglog *hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
     init_hll(hll, b);
     return hll;
 }
-
-// hash tabulky
 
 void print_results(HllDictionary *hlls_table, SetDictionary *sets_table) {
     SetDictionary *s;
@@ -237,6 +134,7 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
     HllDictionary *temp_item;
     Hyperloglog *hll;
     Set set;
+    uint64_t digest_value;
 
     init_parser(&parser, try_fopen(path), 1000, 29, '\t');
     while (next_line(&parser)) {
@@ -248,8 +146,7 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
         
         temp_item = find_hll(stats.id_server, hlls_table);
         if (temp_item == NULL) {
-            hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
-            init_hll(hll, b);
+            hll = create_hll(b);
             add_hll(stats.id_server, hll, hlls_table);
             
             set = create_set(BITSET_SIZE); // 2^18
@@ -258,9 +155,10 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
             hll = temp_item->hll;
             set = find_set_in_dict(stats.id_server, sets_table)->set;
         }
-        str2md5(stats.uuid, digest);
-        updateM(hll, digest);
-        set_element(set, bucket_index(digest, BITSET_EXPONENT));
+        //str2md5(stats.uuid, digest);
+        digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
+        updateM(hll, digest_value);
+        set_element(set, bucket_index(digest_value, BITSET_EXPONENT));
     }
     
     free_parser(&parser);
@@ -280,11 +178,9 @@ void hyperloglog(uint b, const char *path) {
         return;
     }
     
-    while (dir.has_next)
-    {
+    while (dir.has_next) {
         tinydir_file file;
-        if (tinydir_readfile(&dir, &file) == -1)
-		{
+        if (tinydir_readfile(&dir, &file) == -1) {
             perror("Error getting file");
             return;
         }

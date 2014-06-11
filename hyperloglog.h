@@ -7,7 +7,6 @@
 #include <math.h>
 #include <stdint.h>
 #include "declarations.h"
-#include "md5.h"
 #include "structure.h"
 #include "simpleCSV.h"
 #include "assert.h"
@@ -16,6 +15,7 @@
 #include "setdictionary.h"
 #include "set.h"
 #include "tinydir.h"
+#include "murmurhash.h"
 
 typedef struct{
     Hyperloglog *website;
@@ -25,5 +25,7 @@ typedef struct{
 
 void hyperloglog(uint b, const char *path);
 double linear_counting(uint m, uint V);
+uint bucket_index(uint64_t digest, uint b);
+uint rho(uint64_t digest, uint bitlength, uint bitfrom);
 
 #endif
