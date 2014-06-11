@@ -26,6 +26,6 @@ typedef struct{
 void hyperloglog(uint b, const char *path);
 double linear_counting(uint m, uint V);
 uint bucket_index(uint64_t digest, uint b);
-uint rho(uint64_t digest, uint bitlength, uint bitfrom);
+uint rho(uint64_t digest, uint bitfrom);
 
 #endif

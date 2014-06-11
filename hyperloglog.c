@@ -32,7 +32,7 @@ double linear_counting(uint m, uint V) {
  rho(1001000010, 10, 4) = 6
  ^
  */
-uint rho(uint64_t digest, uint bitlength, uint bitfrom) {
+uint rho(uint64_t digest, uint bitfrom) {
     uint64_t base_mask = ((uint64_t) 1) << 63;
     uint64_t mask;
     for (uint64_t i = bitfrom; i < 64; i++) {
@@ -56,7 +56,7 @@ uint bucket_index(uint64_t digest, uint b) {
 void updateM(Hyperloglog *hll, uint64_t digest) {
     uint j, first1;
     j = bucket_index(digest, hll->b);
-    first1 = rho(digest, DIGEST_BIT_LENGTH, hll->b);
+    first1 = rho(digest, hll->b);
     hll->M[j] = max(hll->M[j], first1);
 }
 
