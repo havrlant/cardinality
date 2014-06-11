@@ -155,7 +155,6 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
             hll = temp_item->hll;
             set = find_set_in_dict(stats.id_server, sets_table)->set;
         }
-        //str2md5(stats.uuid, digest);
         digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
         updateM(hll, digest_value);
         set_element(set, bucket_index(digest_value, BITSET_EXPONENT));
