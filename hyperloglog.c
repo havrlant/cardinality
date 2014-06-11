@@ -20,20 +20,6 @@ uint max(uint a, uint b) {
     return a > b ? a : b;
 }
 
-
-uint get_threshold(uint b) {
-    return tresholds[b - 4];
-}
-
-double estimate_bias(double E, uint b) {
-    for (int i = 1; i < 200; i++) {
-        if (raw_estimate_data[b - 4][i] > E) {
-            return ((raw_estimate_data[b - 4][i] - bias_data[b - 4][i]) + (raw_estimate_data[b - 4][i - 1] - bias_data[b - 4][i - 1])) / 2.0;
-        }
-    }
-    return 0;
-}
-
 double linear_counting(uint m, uint V) {
     // return m * log2((double)m / (double)V);
     // printf("m: %u, V: %u, %g\n", m, V, log2((double)m / (double)V + 1));
