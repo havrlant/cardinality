@@ -7,22 +7,11 @@ const uint BITSET_EXPONENT = 18;
 uint BITSET_SIZE;
 uint BITSET_LIMIT;
 
-FILE* try_fopen(const char *path) {
-    FILE* fd = fopen(path, "r");
-    if (fd == NULL) {
-        printf("Nepodarilo se otevrit soubor %s", path);
-        exit(EXIT_FAILURE);
-    }
-    return fd;
-}
-
 uint max(uint a, uint b) {
     return a > b ? a : b;
 }
 
 double linear_counting(uint m, uint V) {
-    // return m * log2((double)m / (double)V);
-    // printf("m: %u, V: %u, %g\n", m, V, log2((double)m / (double)V + 1));
     return m * log2((double)m / (double)V);
 }
 
@@ -149,7 +138,7 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
             hll = create_hll(b);
             add_hll(stats.id_server, hll, hlls_table);
             
-            set = create_set(BITSET_SIZE); // 2^18
+            set = create_set(BITSET_SIZE);
             add_set_to_dict(stats.id_server, set, sets_table);
         } else {
             hll = temp_item->hll;
