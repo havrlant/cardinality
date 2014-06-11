@@ -268,7 +268,7 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
 
 void hyperloglog(uint b, const char *path) {
     BITSET_SIZE = 1 << BITSET_EXPONENT;
-    BITSET_LIMIT = 1 << (BITSET_EXPONENT - 4);
+    BITSET_LIMIT = 1 << (BITSET_EXPONENT - 2);
     
     HllDictionary *hlls_table = create_empty_hll_dict();
     SetDictionary *sets_table = create_empty_set_dict();
