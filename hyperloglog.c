@@ -128,7 +128,7 @@ void print_results(HllDictionary *hlls_table, SetDictionary *sets_table) {
     }
 }
 
-void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **sets_table, uint b, byte *digest) {
+void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **sets_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
     HllDictionary *temp_item;
@@ -170,7 +170,6 @@ void hyperloglog(uint b, const char *path) {
     
     HllDictionary *hlls_table = create_empty_hll_dict();
     SetDictionary *sets_table = create_empty_set_dict();
-    byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
     tinydir_dir dir;
     
     if (tinydir_open(&dir, path) == -1) {
@@ -187,12 +186,12 @@ void hyperloglog(uint b, const char *path) {
         
         if (file.name[0] != '.') {
             printf("Zpracovavam soubor: %s\n", file.path);
-            process_file(file.path, &hlls_table, &sets_table, b, digest);
+            process_file(file.path, &hlls_table, &sets_table, b);
         }
 
 		tinydir_next(&dir);
 	}
     
-    process_file(path, &hlls_table, &sets_table, b, digest);
+    process_file(path, &hlls_table, &sets_table, b);
     print_results(hlls_table, sets_table);
 }
