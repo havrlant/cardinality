@@ -103,27 +103,61 @@ Hyperloglog *create_hll(uint b) {
 }
 
 void print_results(HllDictionary *hlls_table, SetDictionary *sets_table) {
-    SetDictionary *s;
+    SetDictionary *s, *tmp;
     HllDictionary *h;
     uint card;
-    for (s = sets_table; s != NULL; s = s->hh.next) {
-        card = elements_count(s->set, BITSET_SIZE); // pridat Linear Counting
+    HASH_ITER(hh, sets_table, s, tmp) {
+        card = elements_count(s->set, BITSET_SIZE);
         card = linear_counting(BITSET_SIZE, BITSET_SIZE - card);
         if (card > BITSET_LIMIT) {
             h = find_hll(s->hash_id, &hlls_table);
             card = compute_cardinality(h->hll, compute_alpha(h->hll->m));
         }
-        printf("SERVER_ID: %u, cardinality: %u\n", s->hash_id, card);
+        printf("%s, cardinality: %u\n", s->hash_id, card);
     }
+}
+
+size_t compute_hash_length(View view, char** fields) {
+    size_t length = 0;
+    uint index;
+    for (uint i = 0; i < view.fields_count; i++) {
+        index = view.fields_indices[i];
+        length += strlen(fields[index]);
+        length += strlen(view_names[index]);
+        length++;
+    }
+    length += view.fields_count - 1;
+    return length;
+}
+
+char *create_hash_id(View view, char** fields) {
+    size_t length = compute_hash_length(view, fields) + 1;
+    char *newstring = (char*) malloc(length * sizeof(char));
+    size_t j = 0;
+    uint index;
+    for (uint i = 0; i < view.fields_count; i++) {
+        index = view.fields_indices[i];
+        memcpy(&newstring[j], view_names[index], strlen(view_names[index]) * sizeof(char));
+        j += strlen(view_names[index]);
+        newstring[j++] = ':';
+        memcpy(&newstring[j], fields[index], strlen(fields[index]) * sizeof(char));
+        j += strlen(fields[index]);
+        if (i != (view.fields_count - 1)) {
+            newstring[j++] = ',';
+        }
+    }
+    newstring[j] = '\0';
+    return newstring;
 }
 
 void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **sets_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
-    HllDictionary *temp_item;
+    HllDictionary *hll_for_the_id;
     Hyperloglog *hll;
     Set set;
     uint64_t digest_value;
+    char *hash_id;
 
     init_parser(&parser, try_fopen(path), 1000, 29, '\t');
     while (next_line(&parser)) {
@@ -132,21 +166,25 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
         if (strcmp("0", stats.uuid) == 0) {
             continue;
         }
-        
-        temp_item = find_hll(stats.id_server, hlls_table);
-        
-        if (temp_item == NULL) {
-            hll = create_hll(b);
-            add_hll(stats.id_server, hll, hlls_table);
-            set = create_set(BITSET_SIZE);
-            add_set_to_dict(stats.id_server, set, sets_table);
-        } else {
-            hll = temp_item->hll;
-            set = find_set_in_dict(stats.id_server, sets_table)->set;
+        for (uint i = 0; i < VIEWS_COUNT; i++) {
+            hash_id = create_hash_id(views[i], parser.fields);
+            hll_for_the_id = find_hll(hash_id, hlls_table);
+            
+            if (hll_for_the_id == NULL) {
+                hll = create_hll(b);
+                add_hll_to_dict(hash_id, hll, hlls_table);
+                set = create_set(BITSET_SIZE);
+                add_set_to_dict(hash_id, set, sets_table);
+            } else {
+                hll = hll_for_the_id->hll;
+                set = find_set_in_dict(hash_id, sets_table)->set;
+                free(hash_id);
+            }
+            digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
+            updateM(hll, digest_value);
+            set_element(set, bucket_index(digest_value, BITSET_EXPONENT));
         }
-        digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
-        updateM(hll, digest_value);
-        set_element(set, bucket_index(digest_value, BITSET_EXPONENT));
+        
     }
     
     free_parser(&parser);

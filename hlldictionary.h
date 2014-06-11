@@ -13,13 +13,13 @@
 #include "declarations.h"
 
 typedef struct {
-    int hash_id;                    /* key */
+    char *hash_id;
     Hyperloglog *hll;
-    UT_hash_handle hh;         /* makes this structure hashable */
+    UT_hash_handle hh;
 } HllDictionary;
 
 HllDictionary *create_empty_hll_dict();
-void add_hll(uint id, Hyperloglog *hll, HllDictionary **dict);
-HllDictionary *find_hll(uint id, HllDictionary **dict);
+void add_hll_to_dict(char *id, Hyperloglog *hll, HllDictionary **dict);
+HllDictionary *find_hll(char *id, HllDictionary **dict);
 
 #endif
