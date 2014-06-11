@@ -16,6 +16,7 @@
 #include "dstats.h"
 #include "setdictionary.h"
 #include "set.h"
+#include "tinydir.h"
 
 typedef struct{
     Hyperloglog *website;
@@ -23,7 +24,7 @@ typedef struct{
     Hyperloglog **positions;
 } SiteLoglog;
 
-void hyperloglog(uint b, SimpleCSVParser *parser);
+void hyperloglog(uint b, const char *path);
 double linear_counting(uint m, uint V);
 
 #endif

@@ -19,5 +19,6 @@ typedef struct {
 
 void init_parser(SimpleCSVParser *parser, FILE *fd, int max_length_line, int max_fields, char delimiter);
 int next_line(SimpleCSVParser *);
+void free_parser(SimpleCSVParser *parser);
 
 #endif

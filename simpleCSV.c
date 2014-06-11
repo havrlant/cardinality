@@ -55,3 +55,9 @@ int next_line(SimpleCSVParser *parser) {
     }
     return 1;
 }
+
+void free_parser(SimpleCSVParser *parser) {
+    free(parser->buffer);
+    free(parser->fields);
+    fclose(parser->fd);
+}

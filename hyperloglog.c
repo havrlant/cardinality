@@ -4,8 +4,17 @@ const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const uint BITSET_EXPONENT = 18;
-const uint BITSET_SIZE = 1 << BITSET_EXPONENT;
-const uint BITSET_LIMIT = 1 << (BITSET_EXPONENT - 4);
+uint BITSET_SIZE = 1 << BITSET_EXPONENT;
+uint BITSET_LIMIT = 1 << (BITSET_EXPONENT - 4);
+
+FILE* try_fopen(const char *path) {
+    FILE* fd = fopen(path, "r");
+    if (fd == NULL) {
+        printf("Nepodarilo se otevrit soubor %s", path);
+        exit(EXIT_FAILURE);
+    }
+    return fd;
+}
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -103,7 +112,7 @@ void updateM(Hyperloglog *hll, byte *digest) {
 
 uint count_zero_buckets(Hyperloglog *hll) {
     uint count = 0;
-    for (int i = 0; i < hll->m; i++) {
+    for (uint i = 0; i < hll->m; i++) {
         if (hll->M[i] == 0) {
             count++;
         }
@@ -222,48 +231,82 @@ Hyperloglog *create_hll(uint b) {
 
 // hash tabulky
 
-void hyperloglog(uint b, SimpleCSVParser *parser) {
-    HllDictionary *hlls_table = create_empty_hll_dict();
-    SetDictionary *sets_table = create_empty_set_dict();
-    Dstats stats;
-    HllDictionary *temp_item;
-    Hyperloglog *hll;
-    Set set;
-    byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
-    
-    while (next_line(parser)) {
-        parse_line(parser->fields, &stats);
-        // tohle zatim nebudeme pocitat -- dohodnout se s Vlkem
-        if (strcmp("0", stats.uuid) == 0) {
-            continue;
-        }
-        
-        temp_item = find_hll(stats.id_server, &hlls_table);
-        if (temp_item == NULL) {
-            hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
-            init_hll(hll, b);
-            add_hll(stats.id_server, hll, &hlls_table);
-            
-            set = create_set(BITSET_SIZE); // 2^18
-            add_set_to_dict(stats.id_server, set, &sets_table);
-        } else {
-            hll = temp_item->hll;
-            set = find_set_in_dict(stats.id_server, &sets_table)->set;
-        }
-        str2md5(stats.uuid, digest);
-        updateM(hll, digest);
-        set_element(set, bucket_index(digest, BITSET_EXPONENT));
-    }
-    
+void print_results(HllDictionary *hlls_table, SetDictionary *sets_table) {
     SetDictionary *s;
     HllDictionary *h;
     uint card;
     for (s = sets_table; s != NULL; s = s->hh.next) {
-        card = elements_count(s->set, BITSET_SIZE); // pridat LC
+        card = elements_count(s->set, BITSET_SIZE); // pridat Linear Counting
         if (card > BITSET_LIMIT) {
             h = find_hll(s->hash_id, &hlls_table);
             card = compute_cardinality(h->hll, compute_alpha(h->hll->m));
         }
         printf("SERVER_ID: %u, cardinality: %u\n", s->hash_id, card);
     }
+}
+
+void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **sets_table, uint b, byte *digest) {
+    SimpleCSVParser parser;
+    Dstats stats;
+    HllDictionary *temp_item;
+    Hyperloglog *hll;
+    Set set;
+
+    init_parser(&parser, try_fopen(path), 1000, 29, '\t');
+    while (next_line(&parser)) {
+        parse_line(parser.fields, &stats);
+        // tohle zatim nebudeme pocitat -- dohodnout se s Vlkem
+        if (strcmp("0", stats.uuid) == 0) {
+            continue;
+        }
+        
+        temp_item = find_hll(stats.id_server, hlls_table);
+        if (temp_item == NULL) {
+            hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
+            init_hll(hll, b);
+            add_hll(stats.id_server, hll, hlls_table);
+            
+            set = create_set(BITSET_SIZE); // 2^18
+            add_set_to_dict(stats.id_server, set, sets_table);
+        } else {
+            hll = temp_item->hll;
+            set = find_set_in_dict(stats.id_server, sets_table)->set;
+        }
+        str2md5(stats.uuid, digest);
+        updateM(hll, digest);
+        set_element(set, bucket_index(digest, BITSET_EXPONENT));
+    }
+    
+    free_parser(&parser);
+}
+
+void hyperloglog(uint b, const char *path) {
+    HllDictionary *hlls_table = create_empty_hll_dict();
+    SetDictionary *sets_table = create_empty_set_dict();
+    byte *digest = (byte *)malloc(sizeof(unsigned char) * 16);
+    tinydir_dir dir;
+    
+	if (tinydir_open(&dir, path) == -1) {
+		perror("Error opening file");
+        return;
+	}
+    
+    while (dir.has_next)
+	{
+		tinydir_file file;
+		if (tinydir_readfile(&dir, &file) == -1)
+		{
+			perror("Error getting file");
+            return;
+		}
+        
+        if (file.name[0] != '.') {
+            printf("%s\n", file.path);
+        }
+
+		tinydir_next(&dir);
+	}
+    
+    // process_file(path, &hlls_table, &sets_table, b, digest);
+    // print_results(hlls_table, sets_table);
 }
