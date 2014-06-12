@@ -200,7 +200,7 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b) {
         }
         
         if (file.name[0] != '.') {
-            printf("Zpracovavam soubor: %s\n", file.path);
+            // printf("Zpracovavam soubor: %s\n", file.path);
             process_file(file.path, hlls_table, b);
         }
         
