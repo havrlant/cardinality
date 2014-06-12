@@ -4,6 +4,7 @@ const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const int MAXIMUM_CSV_LINE_LENGTH = 5000;
+int badcounter = 0;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -121,8 +122,9 @@ void print_results(HllDictionary *hlls_table) {
     uint card;
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
-        printf("'%s' : %u\n", h->hash_id, card);
+        // printf("'%s' : %u\n", h->hash_id, card);
     }
+    printf("Counter: %i\n", badcounter);
 }
 
 size_t compute_hash_length(View view, char** fields) {
@@ -170,6 +172,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     uint64_t digest_value;
     char *hash_id;
     
+    
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
         parse_line(parser.fields, &stats);
@@ -179,6 +182,19 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
         }
         for (uint i = 0; i < VIEWS_COUNT; i++) {
             hash_id = create_hash_id(views[i], parser.fields);
+            if (strcmp(parser.fields[ID_SERVER], "18913") == 0 &&
+                strcmp(parser.fields[ID_SECTION], "5") == 0 &&
+                strcmp(parser.fields[ID_PLACEMENT], "26") == 0 &&
+                strcmp(parser.fields[ID_BANNER], "2") == 0 &&
+                strcmp(parser.fields[5], "125525") == 0 &&
+                strcmp(parser.fields[6], "463261") == 0 &&
+                strcmp(parser.fields[9], "496989") == 0 &&
+                strcmp(parser.fields[4], "250425") == 0
+                ) {
+                printf("hash_id: %s\n", hash_id);
+                badcounter++;
+                // printf("line: %s")
+            }
             hll_for_the_id = find_hll(hash_id, hlls_table);
             
             if (hll_for_the_id == NULL) {
