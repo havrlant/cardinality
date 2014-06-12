@@ -1,9 +1,9 @@
 #include "dstats.h"
 
 View views[] = {
-    {(uint[]){ID_SERVER}, 1}/*,
+    {(uint[]){ID_SERVER}, 1},
     {(uint[]){ID_SERVER, ID_SECTION}, 2},
-    {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT}, 3},*/
+    {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT}, 3}
 };
 
 char *view_names[] = {
