@@ -182,14 +182,14 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
         }
         for (uint i = 0; i < VIEWS_COUNT; i++) {
             hash_id = create_hash_id(views[i], parser.fields);
-            if (strcmp(parser.fields[ID_SERVER], "18913") == 0 &&
-                strcmp(parser.fields[ID_SECTION], "5") == 0 &&
-                strcmp(parser.fields[ID_PLACEMENT], "26") == 0 &&
-                strcmp(parser.fields[ID_BANNER], "2") == 0 &&
-                strcmp(parser.fields[5], "125525") == 0 &&
-                strcmp(parser.fields[6], "463261") == 0 &&
-                strcmp(parser.fields[9], "496989") == 0 &&
-                strcmp(parser.fields[4], "250425") == 0
+            if (atoi(parser.fields[ID_SERVER]) == 18913 &&
+                atoi(parser.fields[ID_SECTION]) == 5 &&
+                atoi(parser.fields[ID_PLACEMENT]) == 26 &&
+                atoi(parser.fields[ID_BANNER]) == 2 &&
+                atoi(parser.fields[5]) == 125525 &&
+                atoi(parser.fields[6]) == 463261 &&
+                atoi(parser.fields[9]) == 496989 &&
+                atoi(parser.fields[4]) == 250425
                 ) {
                 printf("hash_id: %s\n", hash_id);
                 badcounter++;
