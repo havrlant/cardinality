@@ -119,10 +119,13 @@ uint estimate_cardinality(Hyperloglog *hll) {
 void print_results(HllDictionary *hlls_table) {
     HllDictionary *h, *tmp;
     uint card;
+    uint count = 0;
     HASH_ITER(hh, hlls_table, h, tmp) {
-        card = estimate_cardinality(h->hll);
-        printf("'%s' : %u\n", h->hash_id, card);
+        // card = estimate_cardinality(h->hll);
+        // printf("'%s' : %u\n", h->hash_id, card);
+        count++;
     }
+    printf("count: %u\n", count);
 }
 
 size_t compute_hash_length(View view, char** fields) {
@@ -182,14 +185,14 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             hll_for_the_id = find_hll(hash_id, hlls_table);
             
             if (hll_for_the_id == NULL) {
-                hll = create_hll(b);
-                add_hll_to_dict(hash_id, hll, hlls_table);
+                //hll = create_hll(b);
+                add_hll_to_dict(hash_id, NULL, hlls_table);
             } else {
-                hll = hll_for_the_id->hll;
+                //hll = hll_for_the_id->hll;
                 free(hash_id);
             }
-            digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
-            updateM(hll, digest_value);
+            //digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
+            //updateM(hll, digest_value);
         }
         
     }
