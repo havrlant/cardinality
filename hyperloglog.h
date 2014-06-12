@@ -29,5 +29,7 @@ void hyperloglog(uint b, const char *path);
 double linear_counting(uint m, uint V);
 uint bucket_index(uint64_t digest, uint b);
 uint rho(uint64_t digest, uint bitfrom);
+char *create_hash_id(View view, char** fields);
+size_t compute_hash_length(View view, char** fields);
 
 #endif

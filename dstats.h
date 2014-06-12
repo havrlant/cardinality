@@ -37,7 +37,6 @@ typedef struct {
 
 #define VIEWS_COUNT 6
 View views[VIEWS_COUNT];
-char *view_names[28];
 
 void parse_line(char **fields, Dstats *dstats);
 

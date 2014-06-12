@@ -131,7 +131,7 @@ size_t compute_hash_length(View view, char** fields) {
     for (uint i = 0; i < view.fields_count; i++) {
         index = view.fields_indices[i];
         length += strlen(fields[index]);
-        length += strlen(view_names[index]);
+        length += (index + 1) > 9 ? 2 : 1;
         length++;
     }
     length += view.fields_count - 1;
@@ -140,16 +140,22 @@ size_t compute_hash_length(View view, char** fields) {
 
 char *create_hash_id(View view, char** fields) {
     size_t length = compute_hash_length(view, fields) + 1;
-    char *newstring = (char*) malloc(length * sizeof(char));
+    char *newstring = (char*) calloc(length, sizeof(char));
     size_t j = 0;
     uint index;
+    uint csvindex;
+    size_t field_length;
     for (uint i = 0; i < view.fields_count; i++) {
         index = view.fields_indices[i];
-        memcpy(&newstring[j], view_names[index], strlen(view_names[index]) * sizeof(char));
-        j += strlen(view_names[index]);
+        csvindex = index + 1;
+        if (csvindex > 9) {
+            newstring[j++] = '0' + (csvindex / 10);
+        }
+        newstring[j++] = '0' + (csvindex % 10);
         newstring[j++] = ':';
-        memcpy(&newstring[j], fields[index], strlen(fields[index]) * sizeof(char));
-        j += strlen(fields[index]);
+        field_length = strlen(fields[index]);
+        memcpy(&newstring[j], fields[index], field_length * sizeof(char));
+        j += field_length;
         newstring[j++] = ',';
     }
     newstring[j - 1] = '\0';
@@ -200,7 +206,6 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b) {
         }
         
         if (file.name[0] != '.') {
-            // printf("Zpracovavam soubor: %s\n", file.path);
             process_file(file.path, hlls_table, b);
         }
         

@@ -9,12 +9,6 @@ View views[] = {
     {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL}, 8}
 };
 
-char *view_names[] = {
-    "ID_SERVER",
-    "ID_SECTION",
-    "ID_PLACEMENT"
-};
-
 void parse_line(char **fields, Dstats *dstats) {
     dstats->id_server = fields[ID_SERVER];
     dstats->id_section = fields[ID_SECTION];
