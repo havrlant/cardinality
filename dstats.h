@@ -13,6 +13,10 @@
 #define ID_SECTION 1
 #define ID_PLACEMENT 2
 #define BANNER_TYPE 3
+#define ID_CHANNEL 4
+#define ID_CAMPAIGN 5
+#define ID_PLAN_CAMPAIGN 6
+#define ID_BANNER 9
 #define UUID_INDEX 27
 
 #include "declarations.h"
@@ -31,7 +35,7 @@ typedef struct {
     uint fields_count;
 } View;
 
-#define VIEWS_COUNT 3
+#define VIEWS_COUNT 6
 View views[VIEWS_COUNT];
 char *view_names[28];
 
