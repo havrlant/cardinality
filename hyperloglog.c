@@ -3,6 +3,7 @@
 const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
+const int MAXIMUM_CSV_LINE_LENGTH = 5000;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -163,7 +164,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     uint64_t digest_value;
     char *hash_id;
 
-    init_parser(&parser, try_fopen(path), 1000, 29, '\t');
+    init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
         parse_line(parser.fields, &stats);
         // tohle zatim nebudeme pocitat
