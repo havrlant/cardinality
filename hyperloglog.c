@@ -5,6 +5,7 @@ const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const int MAXIMUM_CSV_LINE_LENGTH = 5000;
 int badcounter = 0;
+Hyperloglog *badhll;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -168,7 +169,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
     HllDictionary *hll_for_the_id;
-    Hyperloglog *hll;
+    Hyperloglog *hll = NULL;
     uint64_t digest_value;
     char *hash_id;
     
@@ -182,6 +183,8 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
         }
         for (uint i = 0; i < VIEWS_COUNT; i++) {
             hash_id = create_hash_id(views[i], parser.fields);
+            hll_for_the_id = find_hll(hash_id, hlls_table);
+            
             if (atoi(parser.fields[0]) == 18913 &&
                 atoi(parser.fields[1]) == 5 &&
                 atoi(parser.fields[2]) == 26 &&
@@ -193,9 +196,11 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
                 ) {
                 printf("hash_id: %s, |%s|\n", hash_id, parser.fields[UUID_INDEX]);
                 badcounter++;
+                if (hll_for_the_id != NULL) {
+                    badhll = hll;
+                }
                 // printf("line: %s")
             }
-            hll_for_the_id = find_hll(hash_id, hlls_table);
             
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
