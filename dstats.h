@@ -31,7 +31,7 @@ typedef struct {
     uint fields_count;
 } View;
 
-#define VIEWS_COUNT 3
+#define VIEWS_COUNT 1
 View views[VIEWS_COUNT];
 char *view_names[28];
 

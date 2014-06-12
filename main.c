@@ -16,6 +16,8 @@ int main(int argc, const char * argv[])
             b = (uint) atoi(argv[2]);
         }
         hyperloglog(b, argv[1]);
+    } else {
+        hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
     }
     
     return 0;

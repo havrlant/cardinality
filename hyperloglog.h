@@ -17,6 +17,7 @@
 #include "tinydir.h"
 #include "murmurhash.h"
 #include "io.h"
+#include "hll_data.h"
 
 typedef struct{
     Hyperloglog *website;

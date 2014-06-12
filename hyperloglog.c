@@ -3,16 +3,22 @@
 const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
-const uint BITSET_EXPONENT = 18;
-uint BITSET_SIZE;
-uint BITSET_LIMIT;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
 }
 
-double linear_counting(uint m, uint V) {
-    return m * log((double)m / (double)V);
+uint get_threshold(uint b) {
+    return tresholds[b - 4];
+}
+
+double estimate_bias(double E, uint b) {
+    for (int i = 1; i < 200; i++) {
+        if (raw_estimate_data[b - 4][i] > E) {
+            return ((raw_estimate_data[b - 4][i] - bias_data[b - 4][i]) + (raw_estimate_data[b - 4][i - 1] - bias_data[b - 4][i - 1])) / 2.0;
+        }
+    }
+    return 0;
 }
 
 /*
@@ -59,21 +65,11 @@ uint count_zero_buckets(Hyperloglog *hll) {
     return count;
 }
 
-double apply_corrections(double E, Hyperloglog *hll) {
-    uint V = 0;
-    double Estar = E;
-    
-    if (E <= (2.5 * hll->m)) {
-        V = count_zero_buckets(hll);
-        if (V != 0) {
-            Estar = linear_counting(hll->m, V);
-        }
-    }
-
-    return Estar;
+double linear_counting(uint m, uint V) {
+    return m * log((double)m / (double)V);
 }
 
-uint compute_cardinality(Hyperloglog *hll, double alpham) {
+uint hyperloglog_cardinality(Hyperloglog *hll, double alpham) {
     uint j;
     double E = 0;
     double sum = 0, harmonicMean;
@@ -82,7 +78,6 @@ uint compute_cardinality(Hyperloglog *hll, double alpham) {
     }
     harmonicMean = hll->m / sum;
     E = alpham * hll->m * harmonicMean;
-    E = apply_corrections(E, hll);
     return (uint)E;
 }
 
@@ -102,18 +97,30 @@ Hyperloglog *create_hll(uint b) {
     return hll;
 }
 
-void print_results(HllDictionary *hlls_table, SetDictionary *sets_table) {
-    SetDictionary *s, *tmp;
-    HllDictionary *h;
+uint apply_corrections(Hyperloglog *hll, uint cardinality) {
+    if (cardinality <= 5 * hll->m) {
+        cardinality -= estimate_bias(cardinality, hll->b);
+    }
+    uint V = count_zero_buckets(hll);
+    uint H = (V == 0) ? cardinality : linear_counting(hll->m, V);
+    if (H < get_threshold(hll->b)) {
+        return H;
+    }
+    return cardinality;
+}
+
+uint estimate_cardinality(Hyperloglog *hll) {
+    uint cardinality = hyperloglog_cardinality(hll, compute_alpha(hll->m)); // cachovat
+    cardinality = apply_corrections(hll, cardinality);
+    return cardinality;
+}
+
+void print_results(HllDictionary *hlls_table) {
+    HllDictionary *h, *tmp;
     uint card;
-    HASH_ITER(hh, sets_table, s, tmp) {
-        card = elements_count(s->set, BITSET_SIZE);
-        card = linear_counting(BITSET_SIZE, BITSET_SIZE - card);
-        if (card > BITSET_LIMIT) {
-            h = find_hll(s->hash_id, &hlls_table);
-            card = compute_cardinality(h->hll, compute_alpha(h->hll->m));
-        }
-        printf("'%s' : %u\n", s->hash_id, card);
+    HASH_ITER(hh, hlls_table, h, tmp) {
+        card = estimate_cardinality(h->hll);
+        printf("'%s' : %u\n", h->hash_id, card);
     }
 }
 
@@ -148,12 +155,11 @@ char *create_hash_id(View view, char** fields) {
     return newstring;
 }
 
-void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **sets_table, uint b) {
+void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
     HllDictionary *hll_for_the_id;
     Hyperloglog *hll;
-    Set set;
     uint64_t digest_value;
     char *hash_id;
 
@@ -171,16 +177,12 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
                 add_hll_to_dict(hash_id, hll, hlls_table);
-                set = create_set(BITSET_SIZE);
-                add_set_to_dict(hash_id, set, sets_table);
             } else {
                 hll = hll_for_the_id->hll;
-                set = find_set_in_dict(hash_id, sets_table)->set;
                 free(hash_id);
             }
             digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
             updateM(hll, digest_value);
-            set_element(set, bucket_index(digest_value, BITSET_EXPONENT));
         }
         
     }
@@ -188,12 +190,7 @@ void process_file(const char *path, HllDictionary **hlls_table, SetDictionary **
     free_parser(&parser);
 }
 
-void init_constants() {
-    BITSET_SIZE = 1 << BITSET_EXPONENT;
-    BITSET_LIMIT = 1 << (BITSET_EXPONENT - 2);
-}
-
-void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, SetDictionary **sets_table, uint b) {
+void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b) {
     while (dir.has_next) {
         tinydir_file file;
         if (tinydir_readfile(&dir, &file) == -1) {
@@ -203,29 +200,19 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, SetDictionar
         
         if (file.name[0] != '.') {
             printf("Zpracovavam soubor: %s\n", file.path);
-            process_file(file.path, hlls_table, sets_table, b);
+            process_file(file.path, hlls_table, b);
         }
         
 		tinydir_next(&dir);
 	}
 }
 
-int try_open_dir(tinydir_dir *dir, const char* path) {
-    if (tinydir_open(dir, path) == -1) {
-        perror("Error opening file");
-        return 0;
-    }
-    return 1;
-}
-
 void hyperloglog(uint b, const char *path) {
-    init_constants();
     HllDictionary *hlls_table = create_empty_hll_dict();
-    SetDictionary *sets_table = create_empty_set_dict();
     tinydir_dir dir;
     
     if (try_open_dir(&dir, path)) {
-        process_all_files(dir, &hlls_table, &sets_table, b);
-        print_results(hlls_table, sets_table);
+        process_all_files(dir, &hlls_table, b);
+        print_results(hlls_table);
     }
 }
