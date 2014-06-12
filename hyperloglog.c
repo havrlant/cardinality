@@ -188,7 +188,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
                 atoi(parser.fields[3]) == 2 &&
                 atoi(parser.fields[5]) == 125525 &&
                 atoi(parser.fields[6]) == 463261 &&
-                // atoi(parser.fields[9]) == 496989 &&
+                atoi(parser.fields[9]) == 496989 &&
                 atoi(parser.fields[4]) == 250425
                 ) {
                 printf("hash_id: %s, '%s', '%s', '%s'\n", hash_id, parser.fields[5], parser.fields[6], parser.fields[9]);
