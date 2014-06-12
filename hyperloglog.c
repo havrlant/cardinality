@@ -101,11 +101,15 @@ Hyperloglog *create_hll(uint b) {
 }
 
 uint apply_corrections(Hyperloglog *hll, uint cardinality) {
+    uint Estar;
     if (cardinality <= 5 * hll->m) {
-        cardinality -= estimate_bias(cardinality, hll->b);
+        Estar = cardinality - estimate_bias(cardinality, hll->b);
+    } else {
+        Estar = cardinality;
     }
     uint V = count_zero_buckets(hll);
-    uint H = (V == 0) ? cardinality : linear_counting(hll->m, V);
+    uint H = (V == 0) ? Estar : linear_counting(hll->m, V);
+    printf("card: %u, Estar: %u, H: %u\n", cardinality, Estar, H);
     if (H < get_threshold(hll->b)) {
         return H;
     }
@@ -113,7 +117,7 @@ uint apply_corrections(Hyperloglog *hll, uint cardinality) {
 }
 
 uint estimate_cardinality(Hyperloglog *hll) {
-    uint cardinality = hyperloglog_cardinality(hll, compute_alpha(hll->m)); // cachovat
+    uint cardinality = hyperloglog_cardinality(hll, compute_alpha(hll->m)); // cachovat alpha
     cardinality = apply_corrections(hll, cardinality);
     return cardinality;
 }
@@ -125,7 +129,6 @@ void print_results(HllDictionary *hlls_table) {
         card = estimate_cardinality(h->hll);
         // printf("'%s' : %u\n", h->hash_id, card);
     }
-    printf("Counter: %i\n", badcounter);
 }
 
 size_t compute_hash_length(View view, char** fields) {
@@ -194,7 +197,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
                 atoi(parser.fields[9]) == 496989 &&
                 atoi(parser.fields[4]) == 250425
                 ) {
-                printf("%s\n", parser.fields[UUID_INDEX]);
+                // printf("%s\n", parser.fields[UUID_INDEX]);
                 badcounter++;
                 if (hll_for_the_id != NULL) {
                     badhll = hll;
