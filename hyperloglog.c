@@ -4,8 +4,6 @@ const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const int MAXIMUM_CSV_LINE_LENGTH = 5000;
-int badcounter = 0;
-Hyperloglog *badhll;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -101,17 +99,13 @@ Hyperloglog *create_hll(uint b) {
 }
 
 uint apply_corrections(Hyperloglog *hll, uint cardinality) {
-    uint Estar;
-    if (cardinality <= 5 * hll->m) {
-        Estar = cardinality - estimate_bias(cardinality, hll->b);
-    } else {
-        Estar = cardinality;
-    }
-    uint V = count_zero_buckets(hll);
-    uint H = (V == 0) ? Estar : linear_counting(hll->m, V);
-    printf("card: %u, Estar: %u, H: %u\n", cardinality, Estar, H);
-    if (H < get_threshold(hll->b)) {
-        return H;
+    uint lc_cardinality;
+    if (cardinality <= (2.5 * hll->m)) {
+        uint V = count_zero_buckets(hll);
+        if (V != 0) {
+            lc_cardinality = linear_counting(hll->m, V);
+            return lc_cardinality;
+        }
     }
     return cardinality;
 }
@@ -127,7 +121,7 @@ void print_results(HllDictionary *hlls_table) {
     uint card;
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
-        // printf("'%s' : %u\n", h->hash_id, card);
+        printf("'%s' : %u\n", h->hash_id, card);
     }
 }
 
@@ -188,23 +182,6 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             hash_id = create_hash_id(views[i], parser.fields);
             hll_for_the_id = find_hll(hash_id, hlls_table);
             
-            if (atoi(parser.fields[0]) == 18913 &&
-                atoi(parser.fields[1]) == 5 &&
-                atoi(parser.fields[2]) == 26 &&
-                atoi(parser.fields[3]) == 2 &&
-                atoi(parser.fields[5]) == 125525 &&
-                atoi(parser.fields[6]) == 463261 &&
-                atoi(parser.fields[9]) == 496989 &&
-                atoi(parser.fields[4]) == 250425
-                ) {
-                // printf("%s\n", parser.fields[UUID_INDEX]);
-                badcounter++;
-                if (hll_for_the_id != NULL) {
-                    badhll = hll;
-                }
-                // printf("line: %s")
-            }
-            
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
                 add_hll_to_dict(hash_id, hll, hlls_table);
@@ -212,6 +189,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
                 hll = hll_for_the_id->hll;
                 free(hash_id);
             }
+            
             digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
             updateM(hll, digest_value);
         }
