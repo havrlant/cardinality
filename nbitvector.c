@@ -1,11 +1,11 @@
-#include "buckets.h"
+#include "nbitvector.h"
 
 uint compute_length_in_bytes(uint length, uint size_in_bits) {
     return (uint)ceil((length * size_in_bits) / (double)BITS_IN_BYTE);
 }
 
-Buckets *create_buckets(uint length, uint size_in_bits) {
-    Buckets *bucks = (Buckets*) malloc(sizeof(Buckets));
+NBitVector *create_buckets(uint length, uint size_in_bits) {
+    NBitVector *bucks = (NBitVector*) malloc(sizeof(NBitVector));
     bucks->length = length;
     bucks->bucket_size_in_bites = size_in_bits;
     uint length_bytes = compute_length_in_bytes(length, size_in_bits);
@@ -14,7 +14,7 @@ Buckets *create_buckets(uint length, uint size_in_bits) {
     return bucks;
 }
 
-void set_value_to_bucket(uint index, uint size_in_bits, Buckets* buckets, uint value) {
+void set_value_to_bucket(uint index, uint size_in_bits, NBitVector* buckets, uint value) {
     uint bits = size_in_bits * index;
     uint byte_index;
     uint bit_index;
@@ -32,7 +32,7 @@ void set_value_to_bucket(uint index, uint size_in_bits, Buckets* buckets, uint v
     }
 }
 
-uint get_value_from_bucket(uint index, uint size_in_bits, Buckets* buckets) {
+uint get_value_from_bucket(uint index, uint size_in_bits, NBitVector* buckets) {
     uint bits = size_in_bits * index;
     uint byte_index;
     uint bit_index;

@@ -17,13 +17,7 @@
 #include "tinydir.h"
 #include "murmurhash.h"
 #include "io.h"
-#include "hll_data.h"
-
-typedef struct{
-    Hyperloglog *website;
-    Hyperloglog **sections;
-    Hyperloglog **positions;
-} SiteLoglog;
+#include "hll_decl.h"
 
 void hyperloglog(uint b, const char *path);
 double linear_counting(uint m, uint V);

@@ -11,6 +11,7 @@
 
 #include "uthash.h"
 #include "declarations.h"
+#include "hll_decl.h"
 
 typedef struct {
     char *hash_id;

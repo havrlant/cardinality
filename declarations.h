@@ -6,10 +6,4 @@ typedef unsigned int uint;
 
 const int BITS_IN_BYTE;
 
-typedef struct {
-    uint b;
-    uint m;
-    byte *M;
-} Hyperloglog;
-
 #endif

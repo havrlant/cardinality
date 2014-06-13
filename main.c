@@ -7,7 +7,7 @@
 #include "uthash.h"
 #include "dstats.h"
 #include "hlldictionary.h"
-#include "buckets.h"
+#include "nbitvector.h"
 
 int main(int argc, const char * argv[])
 {

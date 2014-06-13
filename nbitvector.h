@@ -20,10 +20,10 @@ typedef struct {
     byte *values;
     uint bucket_size_in_bites;
     uint length;
-} Buckets;
+} NBitVector;
 
-Buckets *create_buckets(uint length, uint size_in_bits);
-void set_value_to_bucket(uint index, uint size_in_bits, Buckets* buckets, uint value);
-uint get_value_from_bucket(uint index, uint size_in_bits, Buckets* buckets);
+NBitVector *create_buckets(uint length, uint size_in_bits);
+void set_value_to_bucket(uint index, uint size_in_bits, NBitVector* buckets, uint value);
+uint get_value_from_bucket(uint index, uint size_in_bits, NBitVector* buckets);
 
 #endif
