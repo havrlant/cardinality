@@ -9,7 +9,7 @@
 #define SET_FLAG(N, F)        ( (N) |= (F) )
 #define CLR_FLAG(N, F)        ( (N) &= -(F) )
 #define TST_FLAG(N, F)        ( (N) & (F) )
-#define BIT_RANGE(N, M)       ( BIT_POS((M)+1 - (N))-1 << (N) )
+#define BIT_RANGE(N, M)       ( (BIT_POS((M)+(1 - (N)))-1) << (N) )
 #define BIT_SHIFTL(B, N)      ( (unsigned)(B) << (N) )
 #define BIT_SHIFTR(B, N)      ( (unsigned)(B) >> (N) )
 #define SET_MFLAG(N, F, V)    ( CLR_FLAG(N, F), SET_FLAG(N, V) )
@@ -23,7 +23,7 @@ typedef struct {
 } NBitVector;
 
 NBitVector *create_buckets(uint length, uint size_in_bits);
-void set_value_to_bucket(uint index, uint size_in_bits, NBitVector* buckets, uint value);
+void set_value_to_nbitvector(uint index, uint size_in_bits, NBitVector* vector, uint value);
 uint get_value_from_bucket(uint index, uint size_in_bits, NBitVector* buckets);
 
 #endif

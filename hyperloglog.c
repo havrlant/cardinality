@@ -44,7 +44,7 @@ void updateM(Hyperloglog *hll, uint64_t digest) {
     first1 = rho(digest, hll->b);
     // hll->M[j] = max(hll->M[j], first1);
     temp_max_value = max(first1, get_value_from_bucket(j, M_BUCKET_BIT_LENGTH, hll->M));
-    set_value_to_bucket(j, M_BUCKET_BIT_LENGTH, hll->M, temp_max_value);
+    set_value_to_nbitvector(j, M_BUCKET_BIT_LENGTH, hll->M, temp_max_value);
 }
 
 uint count_zero_buckets(Hyperloglog *hll) {
