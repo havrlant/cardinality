@@ -110,6 +110,9 @@ uint apply_corrections(Hyperloglog *hll, uint cardinality) {
             return lc_cardinality;
         }
     }
+    if (cardinality <= (5 * hll->m)) {
+        printf("hll: %u, lc: %u", cardinality, lc_cardinality);
+    }
     return cardinality;
 }
 
