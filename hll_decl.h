@@ -14,7 +14,7 @@
 typedef struct {
     uint b;
     uint m;
-    NBitVector *M;
+    byte *M;
 } Hyperloglog;
 
 #endif

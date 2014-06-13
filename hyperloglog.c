@@ -4,8 +4,7 @@ const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const int MAXIMUM_CSV_LINE_LENGTH = 5000;
-const double LINEAR_COUNTING_LIMIT = 2.5;
-const uint M_BUCKET_BIT_LENGTH = 6;
+const double LINEAR_COUNTING_LIMIT = 5;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -39,18 +38,16 @@ uint bucket_index(uint64_t digest, uint b) {
 }
 
 void updateM(Hyperloglog *hll, uint64_t digest) {
-    uint j, first1, temp_max_value;
+    uint j, first1;
     j = bucket_index(digest, hll->b);
     first1 = rho(digest, hll->b);
-    // hll->M[j] = max(hll->M[j], first1);
-    temp_max_value = max(first1, get_value_from_bucket(j, M_BUCKET_BIT_LENGTH, hll->M));
-    set_value_to_nbitvector(j, M_BUCKET_BIT_LENGTH, hll->M, temp_max_value);
+    hll->M[j] = max(hll->M[j], first1);
 }
 
 uint count_zero_buckets(Hyperloglog *hll) {
     uint count = 0;
     for (uint i = 0; i < hll->m; i++) {
-        if (get_value_from_bucket(i, M_BUCKET_BIT_LENGTH, hll->M) == 0) {
+        if (hll->M[i] == 0) {
             count++;
         }
     }
@@ -66,7 +63,7 @@ uint hyperloglog_cardinality(Hyperloglog *hll, double alpham) {
     double E = 0;
     double sum = 0, harmonicMean;
     for (j = 0; j < hll->m; j++) {
-        sum += pow(2, - get_value_from_bucket(j, M_BUCKET_BIT_LENGTH, hll->M));
+        sum += pow(2, -(hll->M[j]));
     }
     harmonicMean = hll->m / sum;
     E = alpham * hll->m * harmonicMean;
@@ -80,8 +77,7 @@ double compute_alpha(unsigned int m) {
 void init_hll(Hyperloglog *hll, uint b) {
     hll->b = b;
     hll->m = 1 << b; // 2^b
-    //hll->M = (byte*) calloc(hll->m, sizeof(byte));
-    hll->M = create_buckets(hll->m, M_BUCKET_BIT_LENGTH);
+    hll->M = (byte*) calloc(hll->m, sizeof(byte));
 }
 
 Hyperloglog *create_hll(uint b) {

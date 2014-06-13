@@ -24,6 +24,6 @@ typedef struct {
 
 NBitVector *create_buckets(uint length, uint size_in_bits);
 void set_value_to_nbitvector(uint index, uint size_in_bits, NBitVector* vector, uint value);
-uint get_value_from_bucket(uint index, uint size_in_bits, NBitVector* buckets);
+uint get_value_from_nbitvector(uint index, uint size_in_bits, NBitVector* buckets);
 
 #endif

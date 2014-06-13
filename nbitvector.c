@@ -41,7 +41,7 @@ void set_value_to_nbitvector(uint index, uint size_in_bits, NBitVector* vector, 
     }
 }
 
-uint get_value_from_bucket(uint index, uint size_in_bits, NBitVector* vector) {
+uint get_value_from_nbitvector(uint index, uint size_in_bits, NBitVector* vector) {
     uint bits = size_in_bits * index;
     uint byte_index;
     uint bit_index;
