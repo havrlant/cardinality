@@ -100,8 +100,8 @@ Hyperloglog *create_hll(uint b) {
 
 uint apply_corrections(Hyperloglog *hll, uint cardinality) {
     uint lc_cardinality;
+    uint V = count_zero_buckets(hll);
     if (cardinality <= (2.5 * hll->m)) {
-        uint V = count_zero_buckets(hll);
         if (V != 0) {
             lc_cardinality = linear_counting(hll->m, V);
             if (cardinality >= (hll->m)) {
@@ -111,7 +111,7 @@ uint apply_corrections(Hyperloglog *hll, uint cardinality) {
         }
     }
     if (cardinality <= (5 * hll->m)) {
-        printf("hll: %u, lc: %u", cardinality, lc_cardinality);
+        printf("hll: %u, lc: %u", cardinality, V > 0 ? (uint)linear_counting(hll->m, V) : 0);
     }
     return cardinality;
 }
