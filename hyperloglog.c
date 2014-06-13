@@ -98,22 +98,22 @@ Hyperloglog *create_hll(uint b) {
     return hll;
 }
 
-uint apply_corrections(Hyperloglog *hll, uint cardinality) {
+uint apply_corrections(Hyperloglog *hll, uint hll_cardinality) {
     uint lc_cardinality;
     uint V = count_zero_buckets(hll);
-    if (cardinality <= (2.5 * hll->m)) {
+    if (hll_cardinality <= (2.5 * hll->m)) {
         if (V != 0) {
             lc_cardinality = linear_counting(hll->m, V);
-            if (cardinality >= (hll->m)) {
-                printf("hll: %u, lc: %u", cardinality, lc_cardinality);
+            if (hll_cardinality >= (hll->m)) {
+                printf("(pouzil se lc) hll: %u, lc: %u", hll_cardinality, lc_cardinality);
             }
             return lc_cardinality;
         }
     }
-    if (cardinality <= (5 * hll->m)) {
-        printf("hll: %u, lc: %u", cardinality, V > 0 ? (uint)linear_counting(hll->m, V) : 0);
+    if (hll_cardinality <= (5 * hll->m)) {
+        printf("(pouzil se hll) hll: %u, lc: %u", hll_cardinality, V > 0 ? (uint)linear_counting(hll->m, V) : 0);
     }
-    return cardinality;
+    return hll_cardinality;
 }
 
 uint estimate_cardinality(Hyperloglog *hll) {
