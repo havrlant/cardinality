@@ -4,6 +4,7 @@ const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const int MAXIMUM_CSV_LINE_LENGTH = 5000;
+const double LINEAR_COUNTING_LIMIT = 2.5;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -100,18 +101,12 @@ Hyperloglog *create_hll(uint b) {
 
 uint apply_corrections(Hyperloglog *hll, uint hll_cardinality) {
     uint lc_cardinality;
-    uint V = count_zero_buckets(hll);
-    if (hll_cardinality <= (2.5 * hll->m)) {
+    if (hll_cardinality <= (LINEAR_COUNTING_LIMIT * hll->m)) {
+        uint V = count_zero_buckets(hll);
         if (V != 0) {
             lc_cardinality = linear_counting(hll->m, V);
-            if (hll_cardinality >= (hll->m)) {
-                printf("(pouzil se lc) hll: %u, lc: %u", hll_cardinality, lc_cardinality);
-            }
             return lc_cardinality;
         }
-    }
-    if (hll_cardinality <= (5 * hll->m)) {
-        printf("(pouzil se hll) hll: %u, lc: %u", hll_cardinality, V > 0 ? (uint)linear_counting(hll->m, V) : 0);
     }
     return hll_cardinality;
 }

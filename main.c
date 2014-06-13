@@ -7,6 +7,7 @@
 #include "uthash.h"
 #include "dstats.h"
 #include "hlldictionary.h"
+#include "buckets.h"
 
 int main(int argc, const char * argv[])
 {
@@ -18,12 +19,6 @@ int main(int argc, const char * argv[])
         hyperloglog(b, argv[1]);
     } else {
         hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
-        /*View view = {(uint[]){ 9 }, 2};
-        char *fields[] = {"a", "c", "n", "h", "s", "a", "c", "n", "h", "s", "a", "c", "n", "h", "s", "a", "c", "n", "h", "s"};
-        printf("computed: %u\n", (uint)compute_hash_length(view, fields));
-        char *result = create_hash_id(view, fields);
-        printf("str: '%s'\n", result);
-        printf("strlen: %u\n", (uint)strlen(result));*/
     }
     
     return 0;
