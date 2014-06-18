@@ -155,9 +155,9 @@ void save_sparse(Hyperloglog *hll, char *filename) {
             }
         }
         
-        fwrite(pairs, sizeof(IndexPair), nonzero, fp);
+        fwrite(pairs, sizeof(IndexPair), j, fp);
         fclose(fp);
-        printf("Ocekavana velikost: %u B\n", j * 3);
+        printf("Ocekavana velikost: %u B\n", j * (uint)sizeof(IndexPair));
     }
     save_vector(hll, filename);
 }
