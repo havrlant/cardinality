@@ -9,9 +9,25 @@
 #include "hlldictionary.h"
 #include "nbitvector.h"
 
+void compute_intersection(const char *path1, const char *path2) {
+    Hyperloglog *hll1 = load_from_file(path1, 14);
+    Hyperloglog *hll2 = load_from_file(path2, 14);
+    uint cardinality = estimate_intersection_cardinality(hll1, hll2);
+    printf("Cardinality: %u\n", cardinality);
+}
+
 int main(int argc, const char * argv[])
 {
     if (argc > 1) {
+        if (strcmp(argv[1], "-u")) {
+            if (argc < 4) {
+                printf("Malo parametru.");
+                return 0;
+            } else {
+                compute_intersection(argv[2], argv[3]);
+            }
+            return 0;
+        }
         uint b = 14;
         if (argc > 2) {
             b = (uint) atoi(argv[2]);

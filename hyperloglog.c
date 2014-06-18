@@ -104,12 +104,19 @@ uint estimate_cardinality(Hyperloglog *hll) {
     return cardinality;
 }
 
-void safe_path(char *string, char replacement) {
-    for (int i = 0; string[i] != '\0'; i++) {
-        if (string[i] == ':' || string[i] == ' ') {
-            string[i] = replacement;
-        }
-    }
+uint estimate_union_cardinality(Hyperloglog *hll1, Hyperloglog *hll2) {
+    Hyperloglog *hll_union = union_hll(hll1, hll2);
+    uint cardinality = estimate_cardinality(hll_union);
+    free(hll_union);
+    return cardinality;
+}
+
+uint estimate_intersection_cardinality(Hyperloglog *hll1, Hyperloglog *hll2) {
+    uint cardinality1 = estimate_cardinality(hll1);
+    uint cardinality2 = estimate_cardinality(hll2);
+    uint cardinality_union = estimate_union_cardinality(hll1, hll2);
+    uint cardinality_intersection = cardinality1 + cardinality2 - cardinality_union;
+    return cardinality_intersection;
 }
 
 void save_vector(Hyperloglog *hll, char *filename) {
@@ -135,7 +142,6 @@ void save_sparse(Hyperloglog *hll, char *filename) {
     char path[256];
     strcpy(path, "../compress/sparse/");
     strcat(path, filename);
-    safe_path(path, '_');
     
     double V = (double)count_zero_buckets(hll);
     uint j = 0;
@@ -211,6 +217,14 @@ char *create_hash_id(View view, char** fields) {
     return newstring;
 }
 
+Hyperloglog *union_hll(Hyperloglog *hll1, Hyperloglog *hll2) {
+    Hyperloglog *hll = create_hll(hll1->b);
+    for (int i = 0; i < hll1->m; i++) {
+        hll->M[i] = max(hll1->M[i], hll2->M[i]);
+    }
+    return hll;
+}
+
 void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
@@ -262,6 +276,29 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b) {
         
 		tinydir_next(&dir);
 	}
+}
+
+Hyperloglog *load_from_file(const char *path, uint b) {
+    uint m = 1 << b;
+    byte *M = (byte*) malloc(m);
+    FILE *fp = fopen(path, "rb");
+    
+    if (fp == NULL) {
+        perror("Chyba pri otevirani.");
+        return NULL;
+    }
+    
+    if (!fread(M, sizeof(byte), m, fp)) {
+        perror("Chyba pri cteni");
+        return NULL;
+    }
+    
+    Hyperloglog *hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
+    hll->m = m;
+    hll->b = b;
+    hll->M = M;
+    
+    return hll;
 }
 
 void hyperloglog(uint b, const char *path) {
