@@ -35,7 +35,7 @@ typedef struct {
     uint fields_count;
 } View;
 
-#define VIEWS_COUNT 1
+#define VIEWS_COUNT 3
 View views[VIEWS_COUNT];
 
 void parse_line(char **fields, Dstats *dstats);
