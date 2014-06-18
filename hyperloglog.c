@@ -104,13 +104,57 @@ uint estimate_cardinality(Hyperloglog *hll) {
     return cardinality;
 }
 
+void save_vector(Hyperloglog *hll, char *filename) {
+    char path[256];
+    strcpy(path, "../compress/vectors/");
+    strcat(path, filename);
+    FILE *fp = fopen(path, "wb");
+    
+    if (fp == NULL) {
+        perror("Neotevrel se soubor ");
+        return;
+    }
+    
+    if (!fwrite(hll->M, sizeof(byte), hll->m, fp)) {
+        perror("Chyba pri zapise ");
+    }
+    
+    fclose(fp);
+}
+
+void save_sparse(Hyperloglog *hll, char *filename) {
+    char path[256];
+    strcpy(path, "../compress/sparse/");
+    strcat(path, filename);
+    FILE *fp = fopen(path, "wr");
+    uint16_t index;
+    
+    uint V = count_zero_buckets(hll);
+    if (V >= ((1 / 3.0) * hll->m)) {
+        for (int i = 0; i < hll->m; i++) {
+            if (hll->M > 0) {
+                index = i;
+                fwrite(&index, sizeof(uint16_t), 1, fp);
+                fwrite(&(hll->M[i]), sizeof(byte), 1, fp);
+            }
+        }
+        fclose(fp);
+    } else {
+        save_vector(hll, filename);
+    }
+}
+
+
 void print_results(HllDictionary *hlls_table) {
     HllDictionary *h, *tmp;
     uint card;
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
-        printf("'%s' : %u\n", h->hash_id, card);
+        // printf("'%s' : %u\n", h->hash_id, card);
+        save_sparse(h->hll, h->hash_id);
     }
+    
+    // printf("maxvalue: %u\n", maxvalue);
 }
 
 size_t compute_hash_length(View view, char** fields) {
