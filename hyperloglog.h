@@ -19,6 +19,11 @@
 #include "io.h"
 #include "hll_decl.h"
 
+typedef struct {
+    uint16_t index;
+    byte value;
+} IndexPair;
+
 void hyperloglog(uint b, const char *path);
 double linear_counting(uint m, uint V);
 uint bucket_index(uint64_t digest, uint b);
