@@ -126,7 +126,7 @@ void save_vector(Hyperloglog *hll, char *filename) {
     
     if (!fwrite(hll->M, sizeof(byte), hll->m, fp)) {
         perror("Chyba pri zapise ");
-    }testte
+    }
     
     fclose(fp);
 }
