@@ -137,12 +137,12 @@ void save_sparse(Hyperloglog *hll, char *filename) {
     strcat(path, filename);
     safe_path(path, '_');
     
-    uint V = count_zero_buckets(hll);
+    double V = (double)count_zero_buckets(hll);
     //uint nonzero = hll->m - V;
     // IndexPair *pairs = (IndexPair*) malloc(nonzero * sizeof(IndexPair));
     uint j = 0;
     uint16_t index;
-    if (V >= ((1 / 3.0) * hll->m)) {
+    if ((V / (double)hll->m) >= 1.0 / 3.0) {
         FILE *fp = fopen(path, "wr");
         
         for (uint i = 0; i < hll->m; i++) {
@@ -158,7 +158,7 @@ void save_sparse(Hyperloglog *hll, char *filename) {
         
         // fwrite(pairs, sizeof(IndexPair), j, fp);
         fclose(fp);
-        printf("Ocekavana velikost: %u B\n", j * 3);
+        printf("Ocekavana velikost: %u B, V: %g, m: %u\n", j * 3, V, hll->m);
     }
     save_vector(hll, filename);
 }
