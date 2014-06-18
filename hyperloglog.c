@@ -116,6 +116,7 @@ uint estimate_intersection_cardinality(Hyperloglog *hll1, Hyperloglog *hll2) {
     uint cardinality2 = estimate_cardinality(hll2);
     uint cardinality_union = estimate_union_cardinality(hll1, hll2);
     uint cardinality_intersection = cardinality1 + cardinality2 - cardinality_union;
+    printf("%u;%u;%u;%u\n", cardinality1, cardinality2, cardinality_union, cardinality_intersection);
     return cardinality_intersection;
 }
 
