@@ -140,7 +140,7 @@ void save_sparse(Hyperloglog *hll, char *filename) {
     uint V = count_zero_buckets(hll);
     uint nonzero = hll->m - V;
     IndexPair *pairs = (IndexPair*) malloc(nonzero * sizeof(IndexPair));
-    uint j;
+    uint j = 0;
     if (V >= ((1 / 3.0) * hll->m)) {
         FILE *fp = fopen(path, "wr");
         
