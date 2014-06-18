@@ -12,7 +12,7 @@
 void compute_intersection(const char *path1, const char *path2) {
     Hyperloglog *hll1 = load_from_file(path1, 14);
     Hyperloglog *hll2 = load_from_file(path2, 14);
-    uint cardinality = estimate_intersection_cardinality(hll1, hll2);
+    /*uint cardinality = */estimate_intersection_cardinality(hll1, hll2);
     // printf("%u\n", cardinality);
 }
 

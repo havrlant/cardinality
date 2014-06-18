@@ -10,7 +10,6 @@ void add_set_to_dict(char *id, Set set, SetDictionary **dict) {
     s = (SetDictionary*) malloc(sizeof(SetDictionary));
     s->hash_id = id;
     s->set = set;
-    // HASH_ADD_KEYPTR(hh, *dict, hash_id, s);
     HASH_ADD_KEYPTR(hh, *dict, s->hash_id, strlen(s->hash_id), s);
 }
 
