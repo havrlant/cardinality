@@ -114,9 +114,9 @@ void safe_path(char *string, char replacement) {
 
 void save_vector(Hyperloglog *hll, char *filename) {
     char path[256];
-    strcpy(path, "../compress/vectors/");
+    strcpy(path, "../vectors/");
     strcat(path, filename);
-    safe_path(path, '_');
+    strcat(path, ".txt");
     FILE *fp = fopen(path, "wb");
     
     if (fp == NULL) {
@@ -126,7 +126,7 @@ void save_vector(Hyperloglog *hll, char *filename) {
     
     if (!fwrite(hll->M, sizeof(byte), hll->m, fp)) {
         perror("Chyba pri zapise ");
-    }
+    }testte
     
     fclose(fp);
 }
@@ -138,8 +138,6 @@ void save_sparse(Hyperloglog *hll, char *filename) {
     safe_path(path, '_');
     
     double V = (double)count_zero_buckets(hll);
-    //uint nonzero = hll->m - V;
-    // IndexPair *pairs = (IndexPair*) malloc(nonzero * sizeof(IndexPair));
     uint j = 0;
     uint16_t index;
     if ((V / (double)hll->m) >= 2.0 / 3.0) {
@@ -150,8 +148,6 @@ void save_sparse(Hyperloglog *hll, char *filename) {
                 index = (uint16_t)i;
                 fwrite(&index, 2, 1, fp);
                 fwrite(&(hll->M[i]), 1, 1, fp);
-                /*pairs[j].index = (uint16_t) i;
-                pairs[j].value = hll->M[j];*/
                 j++;
             }
         }
@@ -171,8 +167,8 @@ void print_results(HllDictionary *hlls_table) {
     uint card;
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
-        printf("'%s' : %u\n", h->hash_id, card);
-        // save_sparse(h->hll, h->hash_id);
+        printf("%s:%u\n", h->hash_id, card);
+        save_vector(h->hll, h->hash_id);
     }
     
     // printf("maxvalue: %u\n", maxvalue);
@@ -205,7 +201,7 @@ char *create_hash_id(View view, char** fields) {
             newstring[j++] = '0' + (csvindex / 10);
         }
         newstring[j++] = '0' + (csvindex % 10);
-        newstring[j++] = ':';
+        newstring[j++] = '_';
         field_length = strlen(fields[index]);
         memcpy(&newstring[j], fields[index], field_length * sizeof(char));
         j += field_length;
