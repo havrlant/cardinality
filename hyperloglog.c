@@ -104,10 +104,19 @@ uint estimate_cardinality(Hyperloglog *hll) {
     return cardinality;
 }
 
+void safe_path(char *string, char replacement) {
+    for (int i = 0; string[i] != '\0'; i++) {
+        if (string[i] == ':' || string[i] == ' ') {
+            string[i] = replacement;
+        }
+    }
+}
+
 void save_vector(Hyperloglog *hll, char *filename) {
     char path[256];
     strcpy(path, "../compress/vectors/");
     strcat(path, filename);
+    safe_path(path, '_');
     FILE *fp = fopen(path, "wb");
     
     if (fp == NULL) {
@@ -126,6 +135,7 @@ void save_sparse(Hyperloglog *hll, char *filename) {
     char path[256];
     strcpy(path, "../compress/sparse/");
     strcat(path, filename);
+    safe_path(path, '_');
     FILE *fp = fopen(path, "wr");
     uint16_t index;
     
@@ -139,9 +149,8 @@ void save_sparse(Hyperloglog *hll, char *filename) {
             }
         }
         fclose(fp);
-    } else {
-        save_vector(hll, filename);
     }
+    save_vector(hll, filename);
 }
 
 
