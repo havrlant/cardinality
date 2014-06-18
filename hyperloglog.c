@@ -171,8 +171,8 @@ void print_results(HllDictionary *hlls_table) {
     uint card;
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
-        // printf("'%s' : %u\n", h->hash_id, card);
-        save_sparse(h->hll, h->hash_id);
+        printf("'%s' : %u\n", h->hash_id, card);
+        // save_sparse(h->hll, h->hash_id);
     }
     
     // printf("maxvalue: %u\n", maxvalue);
