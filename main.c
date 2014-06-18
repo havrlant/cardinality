@@ -19,7 +19,7 @@ void compute_intersection(const char *path1, const char *path2) {
 int main(int argc, const char * argv[])
 {
     if (argc > 1) {
-        if (strcmp(argv[1], "-u")) {
+        if (strcmp(argv[1], "--intersection") == 0) {
             if (argc < 4) {
                 printf("Malo parametru.");
                 return 0;
