@@ -219,7 +219,7 @@ char *create_hash_id(View view, char** fields) {
 
 Hyperloglog *union_hll(Hyperloglog *hll1, Hyperloglog *hll2) {
     Hyperloglog *hll = create_hll(hll1->b);
-    for (int i = 0; i < hll1->m; i++) {
+    for (uint i = 0; i < hll1->m; i++) {
         hll->M[i] = max(hll1->M[i], hll2->M[i]);
     }
     return hll;
