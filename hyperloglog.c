@@ -114,9 +114,9 @@ void safe_path(char *string, char replacement) {
 
 void save_vector(Hyperloglog *hll, char *filename) {
     char path[256];
-    strcpy(path, "../vectors/");
+    strcpy(path, "../compress/vectors/");
     strcat(path, filename);
-    strcat(path, ".txt");
+    safe_path(path, '_');
     FILE *fp = fopen(path, "wb");
     
     if (fp == NULL) {
@@ -138,6 +138,8 @@ void save_sparse(Hyperloglog *hll, char *filename) {
     safe_path(path, '_');
     
     double V = (double)count_zero_buckets(hll);
+    //uint nonzero = hll->m - V;
+    // IndexPair *pairs = (IndexPair*) malloc(nonzero * sizeof(IndexPair));
     uint j = 0;
     uint16_t index;
     if ((V / (double)hll->m) >= 2.0 / 3.0) {
@@ -148,6 +150,8 @@ void save_sparse(Hyperloglog *hll, char *filename) {
                 index = (uint16_t)i;
                 fwrite(&index, 2, 1, fp);
                 fwrite(&(hll->M[i]), 1, 1, fp);
+                /*pairs[j].index = (uint16_t) i;
+                pairs[j].value = hll->M[j];*/
                 j++;
             }
         }
@@ -155,7 +159,7 @@ void save_sparse(Hyperloglog *hll, char *filename) {
         // fwrite(pairs, sizeof(IndexPair), j, fp);
         fclose(fp);
         if (j > 100) {
-            printf("Ocekavana velikost: %u B, V: %g, m: %u\n", j * 3, V, hll->m);
+            // printf("Ocekavana velikost: %u B, V: %g, m: %u\n", j * 3, V, hll->m);
         }
     }
     save_vector(hll, filename);
@@ -167,8 +171,8 @@ void print_results(HllDictionary *hlls_table) {
     uint card;
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
-        printf("%s:%u\n", h->hash_id, card);
-        // save_vector(h->hll, h->hash_id);
+        printf("'%s' : %u\n", h->hash_id, card);
+        // save_sparse(h->hll, h->hash_id);
     }
     
     // printf("maxvalue: %u\n", maxvalue);
@@ -201,7 +205,7 @@ char *create_hash_id(View view, char** fields) {
             newstring[j++] = '0' + (csvindex / 10);
         }
         newstring[j++] = '0' + (csvindex % 10);
-        newstring[j++] = '_';
+        newstring[j++] = ':';
         field_length = strlen(fields[index]);
         memcpy(&newstring[j], fields[index], field_length * sizeof(char));
         j += field_length;
@@ -222,13 +226,13 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
-        // parse_line(parser.fields, &stats);
+        parse_line(parser.fields, &stats);
         // tohle zatim nebudeme pocitat
         if (strcmp("0", stats.uuid) == 0) {
             continue;
         }
         for (uint i = 0; i < VIEWS_COUNT; i++) {
-            /*hash_id = create_hash_id(views[i], parser.fields);
+            hash_id = create_hash_id(views[i], parser.fields);
             hll_for_the_id = find_hll(hash_id, hlls_table);
             
             if (hll_for_the_id == NULL) {
@@ -240,8 +244,9 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             }
             
             digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
-            updateM(hll, digest_value);*/
+            updateM(hll, digest_value);
         }
+        
     }
     
     free_parser(&parser);
@@ -256,7 +261,6 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b) {
         }
         
         if (file.name[0] != '.') {
-            printf("Zpracovavam %s\n", file.path);
             process_file(file.path, hlls_table, b);
         }
         

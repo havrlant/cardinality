@@ -9,13 +9,6 @@
 #include "hlldictionary.h"
 #include "nbitvector.h"
 
-/*void compute_intersection(const char *path1, const char *path2) {
-    Hyperloglog *hll1 = load_from_file(path1, 14);
-    Hyperloglog *hll2 = load_from_file(path2, 14);
-    uint cardinality = estimate_intersection_cardinality(hll1, hll2);
-    // printf("%u\n", cardinality);
-}*/
-
 int main(int argc, const char * argv[])
 {
     if (argc > 1) {
@@ -25,7 +18,20 @@ int main(int argc, const char * argv[])
         }
         hyperloglog(b, argv[1]);
     } else {
-        hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
+        // hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
+        
+        /*uint index = 1;
+        uint bitsize = 6;
+        NBitVector *vector = create_buckets(100, bitsize);
+        for (uint i = 0; i < 50; i++) {
+            set_value_to_nbitvector(i, bitsize, vector, i);
+        }
+        
+        for (uint i = 0; i < 50; i++) {
+            if (get_value_from_bucket(i, bitsize, vector) != i) {
+                printf("Nesedi to pro %u.\n", i);
+            }
+        }*/
     }
     
     return 0;

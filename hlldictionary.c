@@ -10,6 +10,7 @@ void add_hll_to_dict(char *id, Hyperloglog *hll, HllDictionary **dict) {
     s = (HllDictionary*) malloc(sizeof(HllDictionary));
     s->hash_id = id;
     s->hll = hll;
+    // HASH_ADD_STR(*dict, hash_id, s);
     HASH_ADD_KEYPTR(hh, *dict, s->hash_id, strlen(s->hash_id), s);
 }
 

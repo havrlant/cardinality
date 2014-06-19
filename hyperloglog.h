@@ -30,9 +30,5 @@ uint bucket_index(uint64_t digest, uint b);
 uint rho(uint64_t digest, uint bitfrom);
 char *create_hash_id(View view, char** fields);
 size_t compute_hash_length(View view, char** fields);
-Hyperloglog *load_from_file(const char *path, uint b);
-Hyperloglog *union_hll(Hyperloglog *hll1, Hyperloglog *hll2);
-uint estimate_cardinality(Hyperloglog *hll);
-uint estimate_intersection_cardinality(Hyperloglog *hll1, Hyperloglog *hll2);
 
 #endif
