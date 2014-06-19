@@ -19,15 +19,6 @@
 int main(int argc, const char * argv[])
 {
     if (argc > 1) {
-        /*if (strcmp(argv[1], "--intersection") == 0) {
-            if (argc < 4) {
-                printf("Malo parametru.");
-                return 0;
-            } else {
-                compute_intersection(argv[2], argv[3]);
-            }
-            return 0;
-        }*/
         uint b = 14;
         if (argc > 2) {
             b = (uint) atoi(argv[2]);
