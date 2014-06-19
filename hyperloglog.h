@@ -18,8 +18,6 @@
 #include "murmurhash.h"
 #include "io.h"
 #include "hll_decl.h"
-#include "avl_tree.h"
-#include "avl_dictionary.h"
 
 typedef struct {
     uint16_t index;

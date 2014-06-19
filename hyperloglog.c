@@ -104,7 +104,7 @@ uint estimate_cardinality(Hyperloglog *hll) {
     cardinality = apply_corrections(hll, cardinality);
     return cardinality;
 }
-
+/*
 uint estimate_union_cardinality(Hyperloglog *hll1, Hyperloglog *hll2) {
     Hyperloglog *hll_union = union_hll(hll1, hll2);
     uint cardinality = estimate_cardinality(hll_union);
@@ -123,10 +123,11 @@ uint estimate_intersection_cardinality(Hyperloglog *hll1, Hyperloglog *hll2) {
     printf("%u;%u;%u;%u\n", cardinality1, cardinality2, cardinality_union, cardinality_intersection);
     return cardinality_intersection;
 }
+ */
 
 void save_vector(Hyperloglog *hll, char *filename) {
     char path[256];
-    strcpy(path, "../vectors/");
+    strcpy(path, "../compress/vectors/");
     strcat(path, filename);
     strcat(path, ".txt");
     FILE *fp = fopen(path, "wb");
@@ -179,7 +180,7 @@ void print_results(HllDictionary *hlls_table) {
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
         printf("%s:%u\n", h->hash_id, card);
-        save_sparse(h->hll, h->hash_id);
+        // save_sparse(h->hll, h->hash_id);
     }
     
     // printf("maxvalue: %u\n", maxvalue);
@@ -230,11 +231,6 @@ Hyperloglog *union_hll(Hyperloglog *hll1, Hyperloglog *hll2) {
     return hll;
 }
 
-void adasdasd(AVLTree *tree) {
-    himlhergot("asdasd", tree, NULL);
-    add_avl_to_dict("Adasd", tree, NULL);
-}
-
 void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
@@ -242,8 +238,8 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     Hyperloglog *hll = NULL;
     uint64_t digest_value;
     char *hash_id;
-    AVLTree *tree;
     
+    printf("Zpracovavam %s\n", path);
     
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
@@ -259,7 +255,6 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
                 add_hll_to_dict(hash_id, hll, hlls_table);
-                tree = create_empty_tree(MAX_MIN_HASHES);
             } else {
                 hll = hll_for_the_id->hll;
                 free(hash_id);
