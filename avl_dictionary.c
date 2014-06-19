@@ -1,15 +1,23 @@
 #include "avl_dictionary.h"
 
-AVLTree *create_empty_avl_dict() {
-    AVLTree *hll = NULL;
-    return hll;
+AvlDictionary *create_empty_avl_dict() {
+    AvlDictionary *tree = NULL;
+    return tree;
 }
 
-void add_avl_to_dict(char *id, AVLTree *avl, AvlDictionary **dict) {
+void himlhergot(char *id, AVLTree *tree, AvlDictionary **dict) {
     AvlDictionary *s;
     s = (AvlDictionary*) malloc(sizeof(AvlDictionary));
     s->hash_id = id;
-    s->avl = avl;
+    s->avl = tree;
+    HASH_ADD_KEYPTR(hh, *dict, s->hash_id, strlen(s->hash_id), s);
+}
+
+void add_avl_to_dict(char *id, AVLTree *tree, AvlDictionary **dict) {
+    AvlDictionary *s;
+    s = (AvlDictionary*) malloc(sizeof(AvlDictionary));
+    s->hash_id = id;
+    s->avl = tree;
     HASH_ADD_KEYPTR(hh, *dict, s->hash_id, strlen(s->hash_id), s);
 }
 

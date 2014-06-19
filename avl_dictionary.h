@@ -13,6 +13,7 @@ typedef struct {
 
 AvlDictionary *find_avl(char *id, AvlDictionary **dict);
 void add_avl_to_dict(char *id, AVLTree *avl, AvlDictionary **dict);
-AVLTree *create_empty_avl_dict();
+AvlDictionary *create_empty_avl_dict();
+void himlhergot(char *id, AVLTree *tree, AvlDictionary **dict);
 
 #endif

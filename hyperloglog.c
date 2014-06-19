@@ -5,6 +5,7 @@ const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const int MAXIMUM_CSV_LINE_LENGTH = 5000;
 const double LINEAR_COUNTING_LIMIT = 5;
+const int MAX_MIN_HASHES = 1024;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -178,7 +179,7 @@ void print_results(HllDictionary *hlls_table) {
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
         printf("%s:%u\n", h->hash_id, card);
-        save_vector(h->hll, h->hash_id);
+        save_sparse(h->hll, h->hash_id);
     }
     
     // printf("maxvalue: %u\n", maxvalue);
@@ -229,6 +230,11 @@ Hyperloglog *union_hll(Hyperloglog *hll1, Hyperloglog *hll2) {
     return hll;
 }
 
+void adasdasd(AVLTree *tree) {
+    himlhergot("asdasd", tree, NULL);
+    add_avl_to_dict("Adasd", tree, NULL);
+}
+
 void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
@@ -236,6 +242,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     Hyperloglog *hll = NULL;
     uint64_t digest_value;
     char *hash_id;
+    AVLTree *tree;
     
     
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
@@ -252,6 +259,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
                 add_hll_to_dict(hash_id, hll, hlls_table);
+                tree = create_empty_tree(MAX_MIN_HASHES);
             } else {
                 hll = hll_for_the_id->hll;
                 free(hash_id);
@@ -260,7 +268,6 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
             updateM(hll, digest_value);
         }
-        
     }
     
     free_parser(&parser);

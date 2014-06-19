@@ -1,31 +1,28 @@
 #include "avl_tree.h"
 
-struct node {
-    NODE_TYPE payload;
-    int height;
-    struct node * kid[2];
-} dummy = { 0, 0, {&dummy, &dummy} }, *nnil = &dummy;
+node dummy = { 0, 0, {&dummy, &dummy} };
+node *nnil = &dummy;
 
-struct node *new_node(NODE_TYPE value)
+node *new_node(NODE_TYPE value)
 {
-    struct node *n = calloc(1, sizeof *n);
+    node *n = calloc(1, sizeof *n);
     *n = (struct node) { value, 1, {nnil, nnil} };
     return n;
 }
 
 NODE_TYPE getmax(NODE_TYPE a, NODE_TYPE b) { return a > b ? a : b; }
 
-void set_height(struct node *n) {
+void set_height(node *n) {
     n->height = 1 + (int)getmax(n->kid[0]->height, n->kid[1]->height);
 }
 
-int ballance(struct node *n) {
+int ballance(node *n) {
     return n->kid[0]->height - n->kid[1]->height;
 }
 
 // rotate a subtree according to dir; if new root is nil, old root is freed
-struct node * rotate(struct node **rootp, int dir) {
-    struct node *old_r = *rootp, *new_r = old_r->kid[dir];
+node * rotate(node **rootp, int dir) {
+    node *old_r = *rootp, *new_r = old_r->kid[dir];
     
     if (nnil == (*rootp = new_r))
         free(old_r);
@@ -37,8 +34,8 @@ struct node * rotate(struct node **rootp, int dir) {
     return new_r;
 }
 
-void adjust_balance(struct node **rootp) {
-    struct node *root = *rootp;
+void adjust_balance(node **rootp) {
+    node *root = *rootp;
     int b = ballance(root)/2;
     if (b) {
         int dir = (1 - b)/2;
@@ -50,7 +47,7 @@ void adjust_balance(struct node **rootp) {
 }
 
 // find the node that contains value as payload; or returns 0
-struct node *query(struct node *root, NODE_TYPE value)
+node *query(node *root, NODE_TYPE value)
 {
     return root == nnil
     ? 0
@@ -59,8 +56,8 @@ struct node *query(struct node *root, NODE_TYPE value)
     : query(root->kid[value > root->payload], value);
 }
 
-int insert(struct node **rootp, NODE_TYPE value) {
-    struct node *root = *rootp;
+int insert(node **rootp, NODE_TYPE value) {
+    node *root = *rootp;
     
     if (root == nnil) {
         *rootp = new_node(value);
@@ -75,8 +72,8 @@ int insert(struct node **rootp, NODE_TYPE value) {
     }
 }
 
-void delete(struct node **rootp, NODE_TYPE value) {
-    struct node *root = *rootp;
+void delete(node **rootp, NODE_TYPE value) {
+    node *root = *rootp;
     if (root == nnil) return; // not found
     
     // if this is the node we want, rotate until off the tree
@@ -89,7 +86,7 @@ void delete(struct node **rootp, NODE_TYPE value) {
 }
 
 // aux display and verification routines, helpful but not essential
-NODE_TYPE max_value(struct node *root) {
+NODE_TYPE max_value(node *root) {
     if (root == nnil) {
         return -1;
     }
@@ -97,6 +94,10 @@ NODE_TYPE max_value(struct node *root) {
         return max_value(root->kid[1]);
     }
     return root->payload;
+}
+
+void AVL_ForEach(AVLTree *tree, void(*action)(NODE_TYPE value)) {
+    
 }
 
 void AVL_delete(AVLTree *tree, NODE_TYPE value) {
@@ -107,7 +108,7 @@ NODE_TYPE AVL_max_value(AVLTree *tree) {
     return max_value(*(tree->root));
 }
 
-void init_AVL_Tree(AVLTree *tree, struct node **root, int max_values) {
+void init_AVL_Tree(AVLTree *tree, node **root, int max_values) {
     tree->root = root;
     tree->max = -1;
     tree->counter = 0;
@@ -128,4 +129,11 @@ void AVL_insert(AVLTree *tree, NODE_TYPE value) {
             }
         }
     }
+}
+
+AVLTree *create_empty_tree(int max_values) {
+    node **root = &nnil;
+    AVLTree *tree = (AVLTree*) malloc(sizeof(AVLTree));
+    init_AVL_Tree(tree, root, max_values);
+    return tree;
 }
