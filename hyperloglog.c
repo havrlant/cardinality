@@ -222,7 +222,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
-        parse_line(parser.fields, &stats);
+        // parse_line(parser.fields, &stats);
         // tohle zatim nebudeme pocitat
         if (strcmp("0", stats.uuid) == 0) {
             continue;
