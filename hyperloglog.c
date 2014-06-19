@@ -242,7 +242,6 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
             updateM(hll, digest_value);
         }
-        
     }
     
     free_parser(&parser);
