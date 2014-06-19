@@ -224,12 +224,12 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     while (next_line(&parser)) {
         parse_line(parser.fields, &stats);
         // tohle zatim nebudeme pocitat
-        /*if (strcmp("0", stats.uuid) == 0) {
+        if (strcmp("0", stats.uuid) == 0) {
             continue;
         }
         for (uint i = 0; i < VIEWS_COUNT; i++) {
             hash_id = create_hash_id(views[i], parser.fields);
-            hll_for_the_id = find_hll(hash_id, hlls_table);
+            /*hll_for_the_id = find_hll(hash_id, hlls_table);
             
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
@@ -240,8 +240,8 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             }
             
             digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
-            updateM(hll, digest_value);
-        }*/
+            updateM(hll, digest_value);*/
+        }
     }
     
     free_parser(&parser);
