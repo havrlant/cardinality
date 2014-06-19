@@ -228,8 +228,8 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             continue;
         }
         for (uint i = 0; i < VIEWS_COUNT; i++) {
-            hash_id = create_hash_id(views[i], parser.fields);
-            /*hll_for_the_id = find_hll(hash_id, hlls_table);
+            /*hash_id = create_hash_id(views[i], parser.fields);
+            hll_for_the_id = find_hll(hash_id, hlls_table);
             
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
