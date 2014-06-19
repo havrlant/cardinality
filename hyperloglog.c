@@ -138,8 +138,6 @@ void save_sparse(Hyperloglog *hll, char *filename) {
     safe_path(path, '_');
     
     double V = (double)count_zero_buckets(hll);
-    //uint nonzero = hll->m - V;
-    // IndexPair *pairs = (IndexPair*) malloc(nonzero * sizeof(IndexPair));
     uint j = 0;
     uint16_t index;
     if ((V / (double)hll->m) >= 2.0 / 3.0) {
@@ -150,18 +148,13 @@ void save_sparse(Hyperloglog *hll, char *filename) {
                 index = (uint16_t)i;
                 fwrite(&index, 2, 1, fp);
                 fwrite(&(hll->M[i]), 1, 1, fp);
-                /*pairs[j].index = (uint16_t) i;
-                pairs[j].value = hll->M[j];*/
                 j++;
             }
         }
         
-        // fwrite(pairs, sizeof(IndexPair), j, fp);
         fclose(fp);
-        if (j > 100) {
-            // printf("Ocekavana velikost: %u B, V: %g, m: %u\n", j * 3, V, hll->m);
-        }
     }
+    
     save_vector(hll, filename);
 }
 
@@ -171,11 +164,9 @@ void print_results(HllDictionary *hlls_table) {
     uint card;
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
-        printf("'%s' : %u\n", h->hash_id, card);
-        // save_sparse(h->hll, h->hash_id);
+        printf("%s:%u\n", h->hash_id, card);
+        save_sparse(h->hll, h->hash_id);
     }
-    
-    // printf("maxvalue: %u\n", maxvalue);
 }
 
 size_t compute_hash_length(View view, char** fields) {
@@ -205,7 +196,7 @@ char *create_hash_id(View view, char** fields) {
             newstring[j++] = '0' + (csvindex / 10);
         }
         newstring[j++] = '0' + (csvindex % 10);
-        newstring[j++] = ':';
+        newstring[j++] = '_';
         field_length = strlen(fields[index]);
         memcpy(&newstring[j], fields[index], field_length * sizeof(char));
         j += field_length;
@@ -222,7 +213,6 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     Hyperloglog *hll = NULL;
     uint64_t digest_value;
     char *hash_id;
-    
     
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
