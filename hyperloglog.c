@@ -5,7 +5,6 @@ const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const int MAXIMUM_CSV_LINE_LENGTH = 5000;
 const double LINEAR_COUNTING_LIMIT = 5;
-const int MAX_MIN_HASHES = 1024;
 
 uint max(uint a, uint b) {
     return a > b ? a : b;
@@ -104,30 +103,18 @@ uint estimate_cardinality(Hyperloglog *hll) {
     cardinality = apply_corrections(hll, cardinality);
     return cardinality;
 }
-/*
-uint estimate_union_cardinality(Hyperloglog *hll1, Hyperloglog *hll2) {
-    Hyperloglog *hll_union = union_hll(hll1, hll2);
-    uint cardinality = estimate_cardinality(hll_union);
-    free(hll_union);
-    return cardinality;
-}
 
-uint estimate_intersection_cardinality(Hyperloglog *hll1, Hyperloglog *hll2) {
-    uint cardinality1 = estimate_cardinality(hll1);
-    uint cardinality2 = estimate_cardinality(hll2);
-    uint cardinality_union = estimate_union_cardinality(hll1, hll2);
-    uint cardinality_intersection = cardinality1 + cardinality2 - cardinality_union;
-    if (cardinality_intersection > (UINT32_MAX - 10000)) {
-        cardinality_intersection = 0;
+void safe_path(char *string, char replacement) {
+    for (int i = 0; string[i] != '\0'; i++) {
+        if (string[i] == ':' || string[i] == ' ') {
+            string[i] = replacement;
+        }
     }
-    printf("%u;%u;%u;%u\n", cardinality1, cardinality2, cardinality_union, cardinality_intersection);
-    return cardinality_intersection;
 }
- */
 
 void save_vector(Hyperloglog *hll, char *filename) {
     char path[256];
-    strcpy(path, "../compress/vectors/");
+    strcpy(path, "../vectors/");
     strcat(path, filename);
     strcat(path, ".txt");
     FILE *fp = fopen(path, "wb");
@@ -148,6 +135,7 @@ void save_sparse(Hyperloglog *hll, char *filename) {
     char path[256];
     strcpy(path, "../compress/sparse/");
     strcat(path, filename);
+    safe_path(path, '_');
     
     double V = (double)count_zero_buckets(hll);
     uint j = 0;
@@ -180,7 +168,7 @@ void print_results(HllDictionary *hlls_table) {
     HASH_ITER(hh, hlls_table, h, tmp) {
         card = estimate_cardinality(h->hll);
         printf("%s:%u\n", h->hash_id, card);
-        // save_sparse(h->hll, h->hash_id);
+        // save_vector(h->hll, h->hash_id);
     }
     
     // printf("maxvalue: %u\n", maxvalue);
@@ -223,14 +211,6 @@ char *create_hash_id(View view, char** fields) {
     return newstring;
 }
 
-Hyperloglog *union_hll(Hyperloglog *hll1, Hyperloglog *hll2) {
-    Hyperloglog *hll = create_hll(hll1->b);
-    for (uint i = 0; i < hll1->m; i++) {
-        hll->M[i] = max(hll1->M[i], hll2->M[i]);
-    }
-    return hll;
-}
-
 void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
@@ -239,7 +219,6 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     uint64_t digest_value;
     char *hash_id;
     
-    printf("Zpracovavam %s\n", path);
     
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
@@ -263,6 +242,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
             updateM(hll, digest_value);
         }
+        
     }
     
     free_parser(&parser);
@@ -282,29 +262,6 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b) {
         
 		tinydir_next(&dir);
 	}
-}
-
-Hyperloglog *load_from_file(const char *path, uint b) {
-    uint m = 1 << b;
-    byte *M = (byte*) malloc(m);
-    FILE *fp = fopen(path, "rb");
-    
-    if (fp == NULL) {
-        perror("Chyba pri otevirani.");
-        return NULL;
-    }
-    
-    if (!fread(M, sizeof(byte), m, fp)) {
-        perror("Chyba pri cteni");
-        return NULL;
-    }
-    
-    Hyperloglog *hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
-    hll->m = m;
-    hll->b = b;
-    hll->M = M;
-    
-    return hll;
 }
 
 void hyperloglog(uint b, const char *path) {
