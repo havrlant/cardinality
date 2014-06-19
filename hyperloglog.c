@@ -162,11 +162,17 @@ void save_sparse(Hyperloglog *hll, char *filename) {
 void print_results(HllDictionary *hlls_table) {
     HllDictionary *h, *tmp;
     uint card;
+    uint64_t bytes_sum = 0;
+    uint i = 0;
     HASH_ITER(hh, hlls_table, h, tmp) {
+        i++;
         card = estimate_cardinality(h->hll);
-        printf("%s:%u\n", h->hash_id, card);
-        save_sparse(h->hll, h->hash_id);
+        // printf("%s:%u\n", h->hash_id, card);
+        // save_sparse(h->hll, h->hash_id);
+        bytes_sum += compress_hll(h->hll);
     }
+    printf("Celkovy pocet bytu: %u\n", bytes_sum);
+    printf("Prumerna velikost vektoru: %g\n", (bytes_sum / (double)i));
 }
 
 size_t compute_hash_length(View view, char** fields) {

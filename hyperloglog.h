@@ -18,6 +18,7 @@
 #include "murmurhash.h"
 #include "io.h"
 #include "hll_decl.h"
+#include "compress.h"
 
 typedef struct {
     uint16_t index;

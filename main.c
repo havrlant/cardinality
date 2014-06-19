@@ -8,7 +8,6 @@
 #include "dstats.h"
 #include "hlldictionary.h"
 #include "nbitvector.h"
-#include "zlib/zlib.h"
 
 int main(int argc, const char * argv[])
 {

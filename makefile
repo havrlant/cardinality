@@ -1,2 +1,2 @@
 cardinality: 
-	gcc -lm -std=c99 -Wall -Wextra -pedantic -O3 *.c -o cardinality
+	gcc -lm -std=c99 -w -O3 *.c zlib/*.c -o cardinality
