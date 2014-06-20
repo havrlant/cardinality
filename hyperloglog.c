@@ -171,7 +171,7 @@ void print_results(HllDictionary *hlls_table) {
         // save_sparse(h->hll, h->hash_id);
         bytes_sum += compress_hll(h->hll);
     }
-    printf("Celkovy pocet bytu: %u\n", bytes_sum);
+    printf("Celkovy pocet bytu: %llu\n", bytes_sum);
     printf("Prumerna velikost vektoru: %g\n", (bytes_sum / (double)i));
 }
 
@@ -238,11 +238,11 @@ void process_file(const char *path, HllDictionary ***hlls_table, uint b) {
         parse_line(parser.fields, &stats);
         for (uint i = 0; i < VIEWS_COUNT; i++) {
             hash_id = create_hash_id(views[i], parser.fields);
-            hll_for_the_id = find_hll(hash_id, hlls_table[0]);
+            hll_for_the_id = find_hll(hash_id, hlls_table[hour]);
             
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
-                add_hll_to_dict(hash_id, hll, hlls_table[0]);
+                add_hll_to_dict(hash_id, hll, hlls_table[hour]);
             } else {
                 hll = hll_for_the_id->hll;
                 free(hash_id);
@@ -276,20 +276,18 @@ void process_all_files(tinydir_dir dir, HllDictionary ***hlls_table, uint b) {
 void hyperloglog(uint b, const char *path) {
     HllDictionary *hlls_table = create_empty_hll_dict();
     HllDictionary *tables[24];
+    HllDictionary ***ptr_tables = (HllDictionary ***) malloc(sizeof(HllDictionary **) * 24);
     for (int i = 0; i < 24; i++) {
         tables[i] = create_empty_hll_dict();
-    }
-    HllDictionary ***ptr_tables = (HllDictionary **) malloc(sizeof(HllDictionary **) * 24);
-    for (int i = 0; i < 24; i++) {
         ptr_tables[i] = &tables[i];
     }
-    tinydir_dir dir;
     
+    tinydir_dir dir;
     if (try_open_dir(&dir, path)) {
         process_all_files(dir, ptr_tables, b);
         for (int i = 0; i < 24; i++) {
+            printf("%i. hodina\n", i);
             print_results(tables[i]);
         }
-        
     }
 }
