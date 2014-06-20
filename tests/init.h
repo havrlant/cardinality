@@ -9,7 +9,7 @@
 #ifndef cardinality_init_h
 #define cardinality_init_h
 
-#include <assert.h>
+#include "../libs/unittest.h"
 
 
 #endif

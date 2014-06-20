@@ -159,17 +159,18 @@ void save_sparse(Hyperloglog *hll, char *filename) {
 }
 
 
-void print_results(HllDictionary *hlls_table) {
+void print_results(HllDictionary *hlls_table, uint b) {
     HllDictionary *h, *tmp;
     uint card;
     uint64_t bytes_sum = 0;
     uint i = 0;
+    byte *compressed = (byte*) malloc(1 << b);
     HASH_ITER(hh, hlls_table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);
         // printf("%s:%u\n", h->hash_id, card);
         // save_sparse(h->hll, h->hash_id);
-        bytes_sum += compress_hll(h->hll);
+        bytes_sum += compress_hll(h->hll, compressed);
     }
     printf("Celkovy pocet megabytu:             %g\n", bytes_sum / (1024*1024.0));
     printf("Prumerna velikost vektoru v bytech: %g\n", (bytes_sum / (double)i));
@@ -294,7 +295,7 @@ void hyperloglog(uint b, const char *path) {
         process_all_files(dir, ptr_tables, b);
         for (int i = 0; i < 24; i++) {
             printf("%i. hodina\n", i);
-            print_results(tables[i]);
+            print_results(tables[i], b);
         }
     }
 }

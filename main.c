@@ -2,7 +2,7 @@
 #include "libs/simpleCSV.h"
 #include "hyperloglog.h"
 #include "declarations.h"
-#include "tests/unittests.h"
+#include "tests/alltests.h"
 #include "dstats.h"
 #include "hlldictionary.h"
 #include "nbitvector.h"

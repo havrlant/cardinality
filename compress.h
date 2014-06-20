@@ -14,6 +14,6 @@
 #include "zlib/zlib.h"
 #include <stdint.h>
 
-uint64_t compress_hll(Hyperloglog *hll);
+uint64_t compress_hll(Hyperloglog *hll, byte *compressed);
 
 #endif
