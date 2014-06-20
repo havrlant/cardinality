@@ -45,10 +45,27 @@ void test_estimate_cardinality() {
     free(hll);
 }
 
+void test_updateM() {
+    byte results[] = {3, 4, 3, 3};
+    uint b = 2;
+    Hyperloglog *hll = create_hll(b);
+    uint64_t digest;
+    
+    for (uint32_t i = 0; i < 10; i++) {
+        digest = MurmurHash64A(&i, 4, 42);
+        updateM(hll, digest);
+    }
+    
+    assert_array_eq(results, hll->M, hll->m, byte);
+    
+    free(hll);
+}
+
 void run_all_hyperloglog() {
     test_rho();
     test_bucket_index();
     test_hyperloglog_cardinality();
     test_apply_corrections();
     test_estimate_cardinality();
+    test_updateM();
 }
