@@ -5,6 +5,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+#include "../declarations.h"
 
 void substring(const char *source, int from, int length, char *destination);
 long int str_to_long_int(const char *str);
