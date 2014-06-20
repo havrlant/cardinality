@@ -4,6 +4,6 @@
 #include "../hyperloglog.h"
 #include "init.h"
 
-void test_hyperloglog();
+void run_all_hyperloglog();
 
 #endif

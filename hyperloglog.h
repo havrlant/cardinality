@@ -25,14 +25,13 @@ typedef struct {
     byte value;
 } IndexPair;
 
-void hyperloglog(uint b, const char *path);
-double linear_counting(uint m, uint V);
 uint bucket_index(uint64_t digest, uint b);
 uint rho(uint64_t digest, uint bitfrom);
-char *build_hash_id(View view, char** fields);
-size_t compute_hash_length(View view, char** fields);
 Hyperloglog *create_hll(uint b);
 uint estimate_cardinality(Hyperloglog *hll);
 void updateM(Hyperloglog *hll, uint64_t digest);
+uint hyperloglog_cardinality(Hyperloglog *hll, double alpham);
+double compute_alpha(unsigned int m);
+uint apply_corrections(Hyperloglog *hll, uint hll_cardinality);
 
 #endif

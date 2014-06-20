@@ -8,7 +8,7 @@ const double LINEAR_COUNTING_LIMIT = 5;
 /*
  Vrati pozici nejlevejsiho bitu, ktery je roven 1.
  Zacina hledat od index bitfrom. Indexuje se od 1.
- rho(1001000010, 10, 4) = 6
+ rho(10100000001, 4) = 6
  ^
  */
 uint rho(uint64_t digest, uint bitfrom) {
