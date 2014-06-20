@@ -171,8 +171,8 @@ void print_results(HllDictionary *hlls_table) {
         // save_sparse(h->hll, h->hash_id);
         bytes_sum += compress_hll(h->hll);
     }
-    printf("Celkovy pocet bytu: %llu\n", bytes_sum);
-    printf("Prumerna velikost vektoru: %g\n", (bytes_sum / (double)i));
+    printf("Celkovy pocet megabytu:             %g\n", bytes_sum / (1024*1024.0));
+    printf("Prumerna velikost vektoru v bytech: %g\n", (bytes_sum / (double)i));
 }
 
 size_t compute_hash_length(View view, char** fields) {
