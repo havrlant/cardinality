@@ -276,7 +276,8 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table[], uint b) {
 void hyperloglog(uint b, const char *path) {
     HllDictionary *hlls_table = create_empty_hll_dict();
     HllDictionary *tables[24];
-    for (int i = 0; i < 24; i++) {
+    // for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < 24; i++) {
         tables[i] = create_empty_hll_dict();
     }
     HllDictionary **ptr_tables[24];
