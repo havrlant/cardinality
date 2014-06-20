@@ -21,5 +21,6 @@
 #include "hyperloglog.h"
 
 void process_all_files(tinydir_dir dir, HllDictionary ***hlls_table, uint b);
+void hyperloglog(uint b, const char *path);
 
 #endif

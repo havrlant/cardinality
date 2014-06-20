@@ -1,10 +1,6 @@
 #include <stdio.h>
-#include "libs/simpleCSV.h"
-#include "hyperloglog.h"
 #include "declarations.h"
-#include "tests/alltests.h"
-#include "dstats.h"
-#include "hlldictionary.h"
+#include "hll_file_consumer.h"
 #include "tests/alltests.h"
 
 int main(int argc, const char * argv[])
