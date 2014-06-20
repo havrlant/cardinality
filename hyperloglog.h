@@ -6,6 +6,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdint.h>
+#include <time.h>
 #include "declarations.h"
 #include "structure.h"
 #include "simpleCSV.h"

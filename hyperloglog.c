@@ -212,14 +212,20 @@ char *create_hash_id(View view, char** fields) {
     return newstring;
 }
 
-void process_file(const char *path, HllDictionary **hlls_table, uint b) {
+int get_hour(const char *path) {
     int timestamp_length = 10;
     char number[timestamp_length + 1];
-    // printf("%s, %s, %li, %i\n", path);
     size_t pathlength = strlen(path);
     size_t timestamp_start = pathlength - strlen("1401947820_bmweb3.dstats");
     substr(path, timestamp_start, timestamp_length, number);
-    printf("%s, %s\n", path, number);
+    time_t timestamp = (time_t)str_to_long_int(number);
+    int hour = get_hour_from_timestamp(timestamp);
+    return hour;
+}
+
+void process_file(const char *path, HllDictionary **hlls_table, uint b) {
+    int hour = get_hour(path);
+    printf("%s, %i\n", path, hour);
     return;
     SimpleCSVParser parser;
     Dstats stats;
