@@ -17,7 +17,7 @@
 #include "hll_decl.h"
 #include "compress.h"
 #include "libs/utils.h"
-#include "vector_producer.h"
+#include "vector_compressor.h"
 #include "linear_counting.h"
 
 typedef struct {

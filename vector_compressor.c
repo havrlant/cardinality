@@ -1,4 +1,4 @@
-#include "vector_producer.h"
+#include "vector_compressor.h"
 
 void save_vector(Hyperloglog *hll, char *filename) {
     char path[256];
