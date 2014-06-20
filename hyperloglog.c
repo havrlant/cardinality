@@ -213,9 +213,13 @@ char *create_hash_id(View view, char** fields) {
 }
 
 void process_file(const char *path, HllDictionary **hlls_table, uint b) {
-    // char number[20];
+    int timestamp_length = 10;
+    char number[timestamp_length + 1];
     // printf("%s, %s, %li, %i\n", path);
-    printf("%s\n", path);
+    size_t pathlength = strlen(path);
+    size_t timestamp_start = pathlength - strlen("1401947820_bmweb3.dstats");
+    substr(path, pathlength, timestamp_length, number);
+    printf("%s, %s\n", path, number);
     return;
     SimpleCSVParser parser;
     Dstats stats;
