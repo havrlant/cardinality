@@ -3,7 +3,7 @@
 
 #include "declarations.h"
 #include "hlldictionary.h"
-#include "tinydir.h"
+#include "libs/tinydir.h"
 #include "libs/simpleCSV.h"
 #include "declarations.h"
 #include "libs/simpleCSV.h"
