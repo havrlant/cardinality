@@ -162,17 +162,17 @@ void save_sparse(Hyperloglog *hll, char *filename) {
 void print_results(HllDictionary *hlls_table) {
     HllDictionary *h, *tmp;
     uint card;
-    // uint64_t bytes_sum = 0;
+    uint64_t bytes_sum = 0;
     uint i = 0;
     HASH_ITER(hh, hlls_table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);
         // printf("%s:%u\n", h->hash_id, card);
         // save_sparse(h->hll, h->hash_id);
-        // bytes_sum += compress_hll(h->hll);
+        bytes_sum += compress_hll(h->hll);
     }
-    // printf("Celkovy pocet bytu: %u\n", bytes_sum);
-    // printf("Prumerna velikost vektoru: %g\n", (bytes_sum / (double)i));
+    printf("Celkovy pocet bytu: %u\n", bytes_sum);
+    printf("Prumerna velikost vektoru: %g\n", (bytes_sum / (double)i));
 }
 
 size_t compute_hash_length(View view, char** fields) {
@@ -223,7 +223,7 @@ int get_hour(const char *path) {
     return hour;
 }
 
-void process_file(const char *path, HllDictionary **hlls_table, uint b) {
+void process_file(const char *path, HllDictionary **hlls_table[], uint b) {
     SimpleCSVParser parser;
     Dstats stats;
     HllDictionary *hll_for_the_id;
@@ -238,11 +238,11 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
         parse_line(parser.fields, &stats);
         for (uint i = 0; i < VIEWS_COUNT; i++) {
             hash_id = create_hash_id(views[i], parser.fields);
-            hll_for_the_id = find_hll(hash_id, hlls_table);
+            hll_for_the_id = find_hll(hash_id, hlls_table[0]);
             
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
-                add_hll_to_dict(hash_id, hll, hlls_table);
+                add_hll_to_dict(hash_id, hll, hlls_table[0]);
             } else {
                 hll = hll_for_the_id->hll;
                 free(hash_id);
@@ -257,7 +257,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     free_parser(&parser);
 }
 
-void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b) {
+void process_all_files(tinydir_dir dir, HllDictionary **hlls_table[], uint b) {
     while (dir.has_next) {
         tinydir_file file;
         if (tinydir_readfile(&dir, &file) == -1) {
@@ -286,7 +286,7 @@ void hyperloglog(uint b, const char *path) {
     tinydir_dir dir;
     
     if (try_open_dir(&dir, path)) {
-        process_all_files(dir, &hlls_table, b);
+        process_all_files(dir, ptr_tables, b);
         print_results(hlls_table);
     }
 }
