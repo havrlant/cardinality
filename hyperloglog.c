@@ -167,7 +167,7 @@ void print_results(HllDictionary *hlls_table) {
     HASH_ITER(hh, hlls_table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);
-        // printf("%s:%u\n", h->hash_id, card);
+        printf("%s:%u\n", h->hash_id, card);
         // save_sparse(h->hll, h->hash_id);
         bytes_sum += compress_hll(h->hll);
     }
@@ -276,7 +276,6 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table[], uint b) {
 void hyperloglog(uint b, const char *path) {
     HllDictionary *hlls_table = create_empty_hll_dict();
     HllDictionary *tables[24];
-    // for (int i = 0; i < 24; i++) {
     for (int i = 0; i < 24; i++) {
         tables[i] = create_empty_hll_dict();
     }
