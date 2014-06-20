@@ -17,7 +17,6 @@
 #include "hll_decl.h"
 #include "compress.h"
 #include "libs/utils.h"
-#include "bitoperations.h"
 #include "vector_producer.h"
 #include "linear_counting.h"
 
@@ -33,5 +32,7 @@ uint rho(uint64_t digest, uint bitfrom);
 char *build_hash_id(View view, char** fields);
 size_t compute_hash_length(View view, char** fields);
 Hyperloglog *create_hll(uint b);
+uint estimate_cardinality(Hyperloglog *hll);
+void updateM(Hyperloglog *hll, uint64_t digest);
 
 #endif
