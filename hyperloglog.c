@@ -6,56 +6,11 @@ const int DIGEST_BIT_LENGTH = 64;
 const int MAXIMUM_CSV_LINE_LENGTH = 5000;
 const double LINEAR_COUNTING_LIMIT = 5;
 
-uint max(uint a, uint b) {
-    return a > b ? a : b;
-}
-
-/*
- Vrati pozici nejlevejsiho bitu, ktery je roven 1.
- Zacina hledat od index bitfrom. Indexuje se od 1.
- rho(1001000010, 10, 4) = 6
- ^
- */
-uint rho(uint64_t digest, uint bitfrom) {
-    uint64_t base_mask = ((uint64_t) 1) << 63;
-    uint64_t mask;
-    for (uint64_t i = bitfrom; i < 64; i++) {
-        mask = base_mask >> i;
-        if ((mask & digest) == mask) {
-            return (uint)i - bitfrom + (uint)1;
-        }
-    }
-    return 0;
-}
-
-
-/*
- Prevede prvnich b bitu na cislo
- bucketIndex(1001000010, 4) = 1001 = 9
- */
-uint bucket_index(uint64_t digest, uint b) {
-    return (uint)(digest >> (uint64_t)(64 - b));
-}
-
 void updateM(Hyperloglog *hll, uint64_t digest) {
     uint j, first1;
     j = bucket_index(digest, hll->b);
     first1 = rho(digest, hll->b);
     hll->M[j] = max(hll->M[j], first1);
-}
-
-uint count_zero_buckets(Hyperloglog *hll) {
-    uint count = 0;
-    for (uint i = 0; i < hll->m; i++) {
-        if (hll->M[i] == 0) {
-            count++;
-        }
-    }
-    return count;
-}
-
-double linear_counting(uint m, uint V) {
-    return m * log((double)m / (double)V);
 }
 
 uint hyperloglog_cardinality(Hyperloglog *hll, double alpham) {
@@ -104,61 +59,6 @@ uint estimate_cardinality(Hyperloglog *hll) {
     return cardinality;
 }
 
-void safe_path(char *string, char replacement) {
-    for (int i = 0; string[i] != '\0'; i++) {
-        if (string[i] == ':' || string[i] == ' ') {
-            string[i] = replacement;
-        }
-    }
-}
-
-void save_vector(Hyperloglog *hll, char *filename) {
-    char path[256];
-    strcpy(path, "../compress/vectors/");
-    strcat(path, filename);
-    safe_path(path, '_');
-    FILE *fp = fopen(path, "wb");
-    
-    if (fp == NULL) {
-        perror("Neotevrel se soubor ");
-        return;
-    }
-    
-    if (!fwrite(hll->M, sizeof(byte), hll->m, fp)) {
-        perror("Chyba pri zapise ");
-    }
-    
-    fclose(fp);
-}
-
-void save_sparse(Hyperloglog *hll, char *filename) {
-    char path[256];
-    strcpy(path, "../compress/sparse/");
-    strcat(path, filename);
-    safe_path(path, '_');
-    
-    double V = (double)count_zero_buckets(hll);
-    uint j = 0;
-    uint16_t index;
-    if ((V / (double)hll->m) >= 2.0 / 3.0) {
-        FILE *fp = fopen(path, "wr");
-        
-        for (uint i = 0; i < hll->m; i++) {
-            if (hll->M[i] > 0) {
-                index = (uint16_t)i;
-                fwrite(&index, 2, 1, fp);
-                fwrite(&(hll->M[i]), 1, 1, fp);
-                j++;
-            }
-        }
-        
-        fclose(fp);
-    }
-    
-    save_vector(hll, filename);
-}
-
-
 void print_results(HllDictionary *hlls_table, uint b) {
     HllDictionary *h, *tmp;
     uint card;
@@ -189,7 +89,7 @@ size_t compute_hash_length(View view, char** fields) {
     return length;
 }
 
-char *create_hash_id(View view, char** fields) {
+char *build_hash_id(View view, char** fields) {
     size_t length = compute_hash_length(view, fields) + 1;
     char *newstring = (char*) calloc(length, sizeof(char));
     size_t j = 0;
@@ -213,17 +113,6 @@ char *create_hash_id(View view, char** fields) {
     return newstring;
 }
 
-int get_hour(const char *path) {
-    int timestamp_length = 10;
-    char number[timestamp_length + 1];
-    size_t pathlength = strlen(path);
-    size_t timestamp_start = pathlength - strlen("1401947820_bmweb3.dstats");
-    substr(path, timestamp_start, timestamp_length, number);
-    time_t timestamp = (time_t)str_to_long_int(number);
-    int hour = get_hour_from_timestamp(timestamp);
-    return hour;
-}
-
 void process_file(const char *path, HllDictionary ***hlls_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
@@ -232,13 +121,13 @@ void process_file(const char *path, HllDictionary ***hlls_table, uint b) {
     uint64_t digest_value;
     char *hash_id;
 
-    int hour = get_hour(path);
+    int hour = get_hour_from_dstats(path);
     
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
         parse_line(parser.fields, &stats);
         for (uint i = 0; i < VIEWS_COUNT; i++) {
-            hash_id = create_hash_id(views[i], parser.fields);
+            hash_id = build_hash_id(views[i], parser.fields);
             hll_for_the_id = find_hll(hash_id, hlls_table[hour]);
             
             if (hll_for_the_id == NULL) {
@@ -282,7 +171,6 @@ void process_all_files(tinydir_dir dir, HllDictionary ***hlls_table, uint b) {
 }
 
 void hyperloglog(uint b, const char *path) {
-    HllDictionary *hlls_table = create_empty_hll_dict();
     HllDictionary *tables[24];
     HllDictionary ***ptr_tables = (HllDictionary ***) malloc(sizeof(HllDictionary **) * 24);
     for (int i = 0; i < 24; i++) {

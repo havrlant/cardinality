@@ -5,11 +5,15 @@
 #include "tests/alltests.h"
 #include "dstats.h"
 #include "hlldictionary.h"
-#include "nbitvector.h"
+#include "tests/alltests.h"
 
 int main(int argc, const char * argv[])
 {
     if (argc > 1) {
+        if (strcmp(argv[1], "--test") == 0) {
+            run_all_tests();
+            return 0;
+        }
         uint b = 14;
         if (argc > 2) {
             b = (uint) atoi(argv[2]);
