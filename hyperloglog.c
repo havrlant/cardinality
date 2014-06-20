@@ -167,7 +167,7 @@ void print_results(HllDictionary *hlls_table) {
     HASH_ITER(hh, hlls_table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);
-        printf("%s:%u\n", h->hash_id, card);
+        // printf("%s:%u\n", h->hash_id, card);
         // save_sparse(h->hll, h->hash_id);
         bytes_sum += compress_hll(h->hll);
     }
@@ -223,7 +223,7 @@ int get_hour(const char *path) {
     return hour;
 }
 
-void process_file(const char *path, HllDictionary **hlls_table, uint b) {
+void process_file(const char *path, HllDictionary ***hlls_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
     HllDictionary *hll_for_the_id;
@@ -238,11 +238,11 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
         parse_line(parser.fields, &stats);
         for (uint i = 0; i < VIEWS_COUNT; i++) {
             hash_id = create_hash_id(views[i], parser.fields);
-            hll_for_the_id = find_hll(hash_id, hlls_table);
+            hll_for_the_id = find_hll(hash_id, hlls_table[0]);
             
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
-                add_hll_to_dict(hash_id, hll, hlls_table);
+                add_hll_to_dict(hash_id, hll, hlls_table[0]);
             } else {
                 hll = hll_for_the_id->hll;
                 free(hash_id);
@@ -257,7 +257,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     free_parser(&parser);
 }
 
-void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b) {
+void process_all_files(tinydir_dir dir, HllDictionary ***hlls_table, uint b) {
     while (dir.has_next) {
         tinydir_file file;
         if (tinydir_readfile(&dir, &file) == -1) {
@@ -279,14 +279,17 @@ void hyperloglog(uint b, const char *path) {
     for (int i = 0; i < 24; i++) {
         tables[i] = create_empty_hll_dict();
     }
-    HllDictionary **ptr_tables[24];
+    HllDictionary ***ptr_tables = (HllDictionary **) malloc(sizeof(HllDictionary **) * 24);
     for (int i = 0; i < 24; i++) {
         ptr_tables[i] = &tables[i];
     }
     tinydir_dir dir;
     
     if (try_open_dir(&dir, path)) {
-        process_all_files(dir, &hlls_table, b);
-        print_results(hlls_table);
+        process_all_files(dir, ptr_tables, b);
+        for (int i = 0; i < 24; i++) {
+            print_results(tables[i]);
+        }
+        
     }
 }
