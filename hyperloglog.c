@@ -213,6 +213,10 @@ char *create_hash_id(View view, char** fields) {
 }
 
 void process_file(const char *path, HllDictionary **hlls_table, uint b) {
+    // char number[20];
+    // printf("%s, %s, %li, %i\n", path);
+    printf("%s\n", path);
+    return;
     SimpleCSVParser parser;
     Dstats stats;
     HllDictionary *hll_for_the_id;
