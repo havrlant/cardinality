@@ -1,7 +1,7 @@
 #ifndef cardinality_setdictionary_h
 #define cardinality_setdictionary_h
 
-#include "uthash.h"
+#include "libs/uthash.h"
 #include "declarations.h"
 #include "set.h"
 #include "string.h"

@@ -1,10 +1,8 @@
 #include <stdio.h>
-#include "simpleCSV.h"
-#include "structure.h"
+#include "libs/simpleCSV.h"
 #include "hyperloglog.h"
 #include "declarations.h"
 #include "tests/unittests.h"
-#include "uthash.h"
 #include "dstats.h"
 #include "hlldictionary.h"
 #include "nbitvector.h"

@@ -9,7 +9,7 @@
 #ifndef cardinality_hlldictionary_h
 #define cardinality_hlldictionary_h
 
-#include "uthash.h"
+#include "libs/uthash.h"
 #include "declarations.h"
 #include "hll_decl.h"
 

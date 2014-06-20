@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "tinydir.h"
+#include "libs/tinydir.h"
 
 FILE* try_fopen(const char *path);
 int try_open_dir(tinydir_dir *dir, const char* path);

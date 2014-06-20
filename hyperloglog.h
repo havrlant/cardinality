@@ -8,19 +8,18 @@
 #include <stdint.h>
 #include <time.h>
 #include "declarations.h"
-#include "structure.h"
-#include "simpleCSV.h"
+#include "libs/simpleCSV.h"
 #include "assert.h"
 #include "hlldictionary.h"
 #include "dstats.h"
 #include "setdictionary.h"
 #include "set.h"
-#include "tinydir.h"
-#include "murmurhash.h"
+#include "libs/tinydir.h"
+#include "libs/murmurhash.h"
 #include "io.h"
 #include "hll_decl.h"
 #include "compress.h"
-#include "utils.h"
+#include "libs/utils.h"
 
 typedef struct {
     uint16_t index;

@@ -258,7 +258,14 @@ void process_file(const char *path, HllDictionary ***hlls_table, uint b) {
 }
 
 void process_all_files(tinydir_dir dir, HllDictionary ***hlls_table, uint b) {
+    uint counter = 0;
+
     while (dir.has_next) {
+        counter++;
+        if (counter % 10 == 0)
+        {
+            printf("Zpracoval jsem %u souboru.\n", counter);
+        }
         tinydir_file file;
         if (tinydir_readfile(&dir, &file) == -1) {
             perror("Error getting file");
