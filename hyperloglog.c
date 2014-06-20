@@ -218,7 +218,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     // printf("%s, %s, %li, %i\n", path);
     size_t pathlength = strlen(path);
     size_t timestamp_start = pathlength - strlen("1401947820_bmweb3.dstats");
-    substr(path, pathlength, timestamp_length, number);
+    substr(path, timestamp_start, timestamp_length, number);
     printf("%s, %s\n", path, number);
     return;
     SimpleCSVParser parser;
