@@ -127,8 +127,10 @@ void hyperloglog(uint b, const char *path) {
         table = NULL;
         if (try_open_dir(&dir, path)) {
             process_all_files(dir, &table, b, hour);
-            printf("%u. hodina\n", hour);
-            print_results(table, b);
+            if (table != NULL) {
+                printf("%u. hodina\n", hour);
+                print_results(table, b);
+            }
             tinydir_close(&dir);
         }
     }
