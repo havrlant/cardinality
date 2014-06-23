@@ -15,6 +15,7 @@ void run_all_tests() {
     run_all_utils();
     run_all_compress();
     run_all_hyperloglog();
+    run_all_linear_counting();
 
     if (_total_errors == 0) {
         printf("ALL %i TESTS PASSED!\n", _total_tests);

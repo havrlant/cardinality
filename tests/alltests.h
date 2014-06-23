@@ -4,6 +4,7 @@
 #include "utils.spec.h"
 #include "compress.spec.h"
 #include "hyperloglog.spec.h"
+#include "linear_counting.spec.h"
 
 void run_all_tests();
 
