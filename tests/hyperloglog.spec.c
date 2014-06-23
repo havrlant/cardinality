@@ -61,6 +61,11 @@ void test_updateM() {
     free(hll);
 }
 
+void test_size_of_Sparse_pair() {
+    sassert(3 == sizeof(SparsePair));
+    sassert(4 == sizeof(_SparsePairForTestOnly));
+}
+
 void run_all_hyperloglog() {
     test_rho();
     test_bucket_index();
@@ -68,4 +73,5 @@ void run_all_hyperloglog() {
     test_apply_corrections();
     test_estimate_cardinality();
     test_updateM();
+    test_size_of_Sparse_pair();
 }

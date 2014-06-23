@@ -8,7 +8,6 @@ int main(int argc, const char * argv[])
 {
     if (argc > 1) {
         if (strcmp(argv[1], "--test") == 0) {
-            
             run_all_tests();
             return 0;
             // hyperloglog(14, "/Users/lukashavrlant/Desktop/test");

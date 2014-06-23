@@ -9,9 +9,18 @@ typedef struct {
     byte *M;
 } Hyperloglog;
 
+#pragma pack(1)
+
 typedef struct {
     uint16_t index;
     byte value;
 } SparsePair;
+
+#pragma pack()
+
+typedef struct {
+    uint16_t index;
+    byte value;
+} _SparsePairForTestOnly;
 
 #endif
