@@ -1,6 +1,7 @@
 #ifndef cardinality_integration_h
 #define cardinality_integration_h
 
+#include <assert.h>
 #include "../declarations.h"
 #include "../hll_file_consumer.h"
 

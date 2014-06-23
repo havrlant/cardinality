@@ -1,6 +1,13 @@
 #include "integration.h"
 
+uint results[3][3] = {
+    {103109, 103, 7},
+    {2317403, 501, 10},
+    {1173615, 400, 9}
+};
+
 ulong process_results(HllDictionary *table, uint b, uint hour) {
+    static uint res_index = 0;
     HllDictionary *h, *tmp;
     uint card;
     ulong bytes_sum = 0;
@@ -25,16 +32,17 @@ ulong process_results(HllDictionary *table, uint b, uint hour) {
     }
     HASH_CLEAR(hh, table);
     free(compressed);
-    printf("Soucet vsech kardinalit:   %lu\n", sum_cardinality);
-    printf("Celkova velikost vektoru:  %u MB\n", bytes_sum / 1024);
-    printf("Prumerna velikost vektoru: %u B\n", (bytes_sum / i));
+    assert(results[res_index][0] == sum_cardinality);
+    assert(results[res_index][1] == (bytes_sum / 1024));
+    assert(results[res_index][2] == (bytes_sum / i));
+    res_index++;
     return bytes_sum;
 }
 
 void run_integration_test(const char *path) {
     uint b = 4;
     HllDictionary *table;
-    uint64_t bytes_sum = 0;
+    ulong bytes_sum = 0;
     tinydir_dir dir;
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
@@ -45,4 +53,5 @@ void run_integration_test(const char *path) {
         }
         tinydir_close(&dir);
     }
+    printf("%lu\n", bytes_sum);
 }
