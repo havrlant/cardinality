@@ -1,6 +1,7 @@
 #include "hll_file_consumer.h"
 
 const int MAXIMUM_CSV_LINE_LENGTH = 5000;
+const uint HOURS_IN_DAY = 24;
 
 size_t compute_hash_length(View view, char** fields) {
     size_t length = 0;
@@ -120,12 +121,15 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint
 }
 
 void hyperloglog(uint b, const char *path) {
-    HllDictionary *table = NULL;
+    HllDictionary *table;
     
     tinydir_dir dir;
-    if (try_open_dir(&dir, path)) {
-        process_all_files(dir, &table, b, 0);
-        print_results(table, b);
-        tinydir_close(&dir);
+    for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
+        table = NULL;
+        if (try_open_dir(&dir, path)) {
+            process_all_files(dir, &table, b, hour);
+            print_results(table, b);
+            tinydir_close(&dir);
+        }
     }
 }
