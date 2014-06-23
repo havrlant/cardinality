@@ -10,10 +10,12 @@ ulong process_results(HllDictionary *table, uint b) {
     SparsePair *pairs = (SparsePair*) malloc(sizeof(SparsePair) * m); // ToDo dve tretiny m
     ulong hll_compressed_size;
     ulong sparse_size;
+    ulong sum_cardinality = 0;
     HASH_ITER(hh, table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);
-        printf("%s:%u\n", h->hash_id, card);
+        // printf("%s:%u\n", h->hash_id, card);
+        sum_cardinality += card;
         hll_compressed_size = compress_hll(h->hll, compressed);
         sparse_size = compress_sparse(h->hll, compressed, pairs);
         bytes_sum += min_ulong(hll_compressed_size, sparse_size);
@@ -23,6 +25,7 @@ ulong process_results(HllDictionary *table, uint b) {
     }
     HASH_CLEAR(hh, table);
     free(compressed);
+    printf("Soucet vsech kardinalit:   %lu\n", sum_cardinality);
     printf("Celkova velikost vektoru:  %g MB\n", bytes_sum / (1024*1024.0));
     printf("Prumerna velikost vektoru: %g B\n", (bytes_sum / (double)i));
     return bytes_sum;
