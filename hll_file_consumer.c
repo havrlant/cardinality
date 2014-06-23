@@ -133,5 +133,5 @@ void hyperloglog(uint b, const char *path) {
             tinydir_close(&dir);
         }
     }
-    printf("\n\nVelikost vsech vektoru z daneho dne: %llu MB\n", (bytes_sum / (1024*1024)));
+    printf("\n\nVelikost vsech vektoru z daneho dne: %lu MB\n", (bytes_sum / (1024*1024)));
 }
