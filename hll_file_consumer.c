@@ -86,7 +86,6 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
         i++;
         card = estimate_cardinality(h->hll);
         // printf("%s:%u\n", h->hash_id, card);
-        // save_sparse(h->hll, h->hash_id);
         hll_compressed_size = compress_hll(h->hll, compressed);
         sparse_size = compress_sparse(h->hll, compressed, pairs);
         bytes_sum += min_ulong(hll_compressed_size, sparse_size);

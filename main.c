@@ -3,12 +3,16 @@
 #include "declarations.h"
 #include "hll_file_consumer.h"
 #include "tests/alltests.h"
+#include "tests/integration.h"
 
 int main(int argc, const char * argv[])
 {
     if (argc > 1) {
         if (strcmp(argv[1], "--test") == 0) {
             run_all_tests();
+            if (argc > 2) {
+                run_integration_test(argv[2]);
+            }
             return 0;
             // hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
         } else {

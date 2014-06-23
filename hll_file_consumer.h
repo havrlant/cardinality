@@ -19,6 +19,8 @@
 #include "linear_counting.h"
 #include "hyperloglog.h"
 
+extern const uint HOURS_IN_DAY;
+
 void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour);
 void hyperloglog(uint b, const char *path);
 size_t compute_hash_length(View view, char** fields);
