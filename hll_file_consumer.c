@@ -63,7 +63,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
             }
             
             uuid = parser.fields[UUID_INDEX];
-            digest_value = MurmurHash64A(uuid, (int)uuid, 42);
+            digest_value = MurmurHash64A(uuid, (int)strlen(uuid), 42);
             updateM(hll, digest_value);
         }
         
