@@ -72,7 +72,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     free_parser(&parser);
 }
 
-void print_results(HllDictionary *hlls_table, uint b) {
+uint64_t print_results(HllDictionary *hlls_table, uint b) {
     HllDictionary *h, *tmp;
     uint card;
     uint64_t bytes_sum = 0;
@@ -92,6 +92,7 @@ void print_results(HllDictionary *hlls_table, uint b) {
     free(compressed);
     printf("Celkova velikost vektoru:  %g MB\n", bytes_sum / (1024*1024.0));
     printf("Prumerna velikost vektoru: %g B\n", (bytes_sum / (double)i));
+    return bytes_sum;
 }
 
 void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint hour) {
@@ -109,9 +110,6 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint
             filehour = get_hour_from_dstats(file.path);
             if (filehour == hour) {
                 counter++;
-                /*if (counter % 50 == 0) {
-                    printf("Zpracoval jsem %u souboru patrici %u. hodine.\n", counter, hour);
-                }*/
                 process_file(file.path, hlls_table, b);
             }
         }
@@ -122,7 +120,7 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint
 
 void hyperloglog(uint b, const char *path) {
     HllDictionary *table;
-    
+    uint64_t bytes_sum = 0;
     tinydir_dir dir;
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
@@ -130,9 +128,10 @@ void hyperloglog(uint b, const char *path) {
             process_all_files(dir, &table, b, hour);
             if (table != NULL) {
                 printf("%u. hodina\n", hour);
-                print_results(table, b);
+                bytes_sum += print_results(table, b);
             }
             tinydir_close(&dir);
         }
     }
+    printf("\n\nVelikost vsech vektoru z daneho dne: %llu MB\n", (bytes_sum / (1024*1024)));
 }
