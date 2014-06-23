@@ -54,4 +54,5 @@ void run_integration_test(const char *path) {
         tinydir_close(&dir);
     }
     assert(1030015 == bytes_sum);
+    printf("Integration test passed! Relax.\n");
 }
