@@ -5,10 +5,12 @@
 
 int main(int argc, const char * argv[])
 {
+    printf("asdasd");
     if (argc > 1) {
         if (strcmp(argv[1], "--test") == 0) {
+            
             run_all_tests();
-            return 0;
+            // return 0;
             hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
         }
         uint b = 14;

@@ -97,13 +97,13 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
     return bytes_sum;
 }
 
-void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint hour) {
+void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour) {
     uint counter = 0;
     uint filehour;
+    tinydir_file file;
     
-    while (dir.has_next) {
-        tinydir_file file;
-        if (tinydir_readfile(&dir, &file) == -1) {
+    while (dir->has_next) {
+        if (tinydir_readfile(dir, &file) == -1) {
             perror("Error getting file");
             return;
         }
@@ -116,7 +116,7 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint
             }
         }
         
-		tinydir_next(&dir);
+		tinydir_next(dir);
 	}
 }
 
@@ -126,14 +126,13 @@ void hyperloglog(uint b, const char *path) {
     tinydir_dir dir;
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
-        if (try_open_dir(&dir, path)) {
-            process_all_files(dir, &table, b, hour);
-            if (table != NULL) {
-                printf("%u. hodina\n", hour);
-                bytes_sum += print_results(table, b);
-            }
-            tinydir_close(&dir);
+        tinydir_open(&dir, path);
+        process_all_files(&dir, &table, b, hour);
+        if (table != NULL) {
+            printf("%u. hodina\n", hour);
+            bytes_sum += print_results(table, b);
         }
+            tinydir_close(&dir);
     }
     printf("\n\nVelikost vsech vektoru z daneho dne: %u MB\n", (uint) (bytes_sum / (1024*1024)));
 }
