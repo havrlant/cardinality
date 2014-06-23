@@ -22,6 +22,7 @@ uint32_t compress_hll(Hyperloglog *hll, byte *compressed) {
     return (uint)compress_bytes(hll->M, compressed, hll->m, hll->m);
 }
 
+
 uint32_t compress_sparse(Hyperloglog *hll, byte *compressed, SparsePair *temp) {
     double V = (double)count_zero_buckets(hll);
     uint temp_index = 0;

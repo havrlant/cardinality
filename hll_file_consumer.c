@@ -89,7 +89,6 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
         // save_sparse(h->hll, h->hash_id);
         hll_compressed_size = compress_hll(h->hll, compressed);
         sparse_size = compress_sparse(h->hll, compressed, pairs);
-        printf("%u, %u, %u\n", hll_compressed_size, sparse_size, min(hll_compressed_size, sparse_size));
         bytes_sum += min(hll_compressed_size, sparse_size);
         free(h->hll->M);
         free(h->hll);

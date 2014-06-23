@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "declarations.h"
 #include "hll_file_consumer.h"
 #include "tests/alltests.h"
@@ -9,8 +10,8 @@ int main(int argc, const char * argv[])
         if (strcmp(argv[1], "--test") == 0) {
             
             run_all_tests();
-            // return 0;
-            hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
+            return 0;
+            // hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
         } else {
             uint b = 14;
             if (argc > 2) {
