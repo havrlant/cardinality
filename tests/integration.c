@@ -34,7 +34,7 @@ ulong process_results(HllDictionary *table, uint b, uint hour) {
     free(compressed);
     assert(results[res_index][0] == sum_cardinality);
     assert(results[res_index][1] == (bytes_sum / 1024));
-    assert(results[res_index][1] == (bytes_sum / i));
+    assert(results[res_index][2] == (bytes_sum / i));
     res_index++;
     return bytes_sum;
 }
@@ -53,5 +53,5 @@ void run_integration_test(const char *path) {
         }
         tinydir_close(&dir);
     }
-    printf("%lu\n", bytes_sum);
+    assert(1030015 == bytes_sum);
 }
