@@ -19,4 +19,3 @@ HllDictionary *find_hll(char *id, HllDictionary **dict) {
     HASH_FIND_STR(*dict, id, s);
     return s;
 }
-

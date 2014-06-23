@@ -9,6 +9,7 @@ int main(int argc, const char * argv[])
         if (strcmp(argv[1], "--test") == 0) {
             run_all_tests();
             return 0;
+            hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
         }
         uint b = 14;
         if (argc > 2) {
@@ -16,16 +17,8 @@ int main(int argc, const char * argv[])
         }
         hyperloglog(b, argv[1]);
     } else {
-        // hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
+        hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
     }
     
     return 0;
 }
-
-/*
- 1:17898,2:1,3:1,4:2,6:0,
- 1:17898,2:1,3:1,4:2,6:0,7:0,
- 1:17898,2:1,3:1,4:2,6:0,7:0,10:0,
- 1:17898,2:1,3:1,4:2,6:0,7:0,10:0,5:0,
- '1:17898,2:1,3:1,4:2,6:0,7:0,10:0,5:0', 36, 35
-*/

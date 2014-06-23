@@ -39,7 +39,7 @@ char *build_hash_id(View view, char** fields) {
     return newstring;
 }
 
-void process_file(const char *path, HllDictionary ***hlls_table, uint b) {
+void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     SimpleCSVParser parser;
     Dstats stats;
     HllDictionary *hll_for_the_id;
@@ -47,18 +47,16 @@ void process_file(const char *path, HllDictionary ***hlls_table, uint b) {
     uint64_t digest_value;
     char *hash_id;
     
-    int hour = get_hour_from_dstats(path);
-    
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
         parse_line(parser.fields, &stats);
         for (uint i = 0; i < VIEWS_COUNT; i++) {
             hash_id = build_hash_id(views[i], parser.fields);
-            hll_for_the_id = find_hll(hash_id, hlls_table[hour]);
+            hll_for_the_id = find_hll(hash_id, hlls_table);
             
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
-                add_hll_to_dict(hash_id, hll, hlls_table[hour]);
+                add_hll_to_dict(hash_id, hll, hlls_table);
             } else {
                 hll = hll_for_the_id->hll;
                 free(hash_id);
@@ -85,18 +83,22 @@ void print_results(HllDictionary *hlls_table, uint b) {
         // printf("%s:%u\n", h->hash_id, card);
         // save_sparse(h->hll, h->hash_id);
         bytes_sum += compress_hll(h->hll, compressed);
+        free(h->hll->M);
+        free(h->hll);
+        free(h->hash_id);
     }
+    free(compressed);
     printf("Celkovy pocet megabytu:             %g\n", bytes_sum / (1024*1024.0));
     printf("Prumerna velikost vektoru v bytech: %g\n", (bytes_sum / (double)i));
 }
 
-void process_all_files(tinydir_dir dir, HllDictionary ***hlls_table, uint b) {
+void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint hour) {
     uint counter = 0;
+    uint filehour;
     
     while (dir.has_next) {
         counter++;
-        if (counter % 10 == 0)
-        {
+        if (counter % 10 == 0) {
             printf("Zpracoval jsem %u souboru.\n", counter);
         }
         tinydir_file file;
@@ -106,7 +108,11 @@ void process_all_files(tinydir_dir dir, HllDictionary ***hlls_table, uint b) {
         }
         
         if (file.name[0] != '.') {
-            process_file(file.path, hlls_table, b);
+            filehour = get_hour_from_dstats(file.path);
+            printf("%u, %u\n", filehour, hour);
+            if (filehour == hour) {
+                process_file(file.path, hlls_table, b);
+            }
         }
         
 		tinydir_next(&dir);
@@ -114,19 +120,12 @@ void process_all_files(tinydir_dir dir, HllDictionary ***hlls_table, uint b) {
 }
 
 void hyperloglog(uint b, const char *path) {
-    HllDictionary *tables[24];
-    HllDictionary ***ptr_tables = (HllDictionary ***) malloc(sizeof(HllDictionary **) * 24);
-    for (int i = 0; i < 24; i++) {
-        tables[i] = create_empty_hll_dict();
-        ptr_tables[i] = &tables[i];
-    }
+    HllDictionary *table = NULL;
     
     tinydir_dir dir;
     if (try_open_dir(&dir, path)) {
-        process_all_files(dir, ptr_tables, b);
-        for (int i = 0; i < 24; i++) {
-            printf("%i. hodina\n", i);
-            print_results(tables[i], b);
-        }
+        process_all_files(dir, &table, b, 0);
+        print_results(table, b);
+        tinydir_close(&dir);
     }
 }

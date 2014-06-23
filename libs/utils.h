@@ -10,7 +10,7 @@
 void substring(const char *source, int from, int length, char *destination);
 long int str_to_long_int(const char *str);
 int get_hour_from_timestamp(time_t timestamp);
-int get_hour_from_dstats(const char *path);
+uint get_hour_from_dstats(const char *path);
 uint max(uint a, uint b);
 
 #endif

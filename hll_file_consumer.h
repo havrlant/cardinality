@@ -20,7 +20,7 @@
 #include "linear_counting.h"
 #include "hyperloglog.h"
 
-void process_all_files(tinydir_dir dir, HllDictionary ***hlls_table, uint b);
+void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint hour);
 void hyperloglog(uint b, const char *path);
 
 #endif

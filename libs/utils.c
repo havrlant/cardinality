@@ -23,9 +23,9 @@ time_t get_timestamp_from_dstats(const char *path) {
     return (time_t)str_to_long_int(number);
 }
 
-int get_hour_from_dstats(const char *path) {
+uint get_hour_from_dstats(const char *path) {
     time_t timestamp = get_timestamp_from_dstats(path);
-    return get_hour_from_timestamp(timestamp);
+    return (uint)get_hour_from_timestamp(timestamp);
 }
 
 uint max(uint a, uint b) {
