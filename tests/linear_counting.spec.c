@@ -7,6 +7,7 @@ void test_count_zero_buckets() {
     hll->M[3] = 1;
     hll->M[8] = 2;
     sassert((hll->m - 2) == count_zero_buckets(hll));
+    free(hll->M);
     free(hll);
 }
 
