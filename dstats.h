@@ -17,6 +17,7 @@
 #define ID_CAMPAIGN 5
 #define ID_PLAN_CAMPAIGN 6
 #define ID_BANNER 9
+#define BANNER_VERSION 17
 #define UUID_INDEX 27
 
 #include "declarations.h"

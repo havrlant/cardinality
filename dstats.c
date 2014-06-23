@@ -4,9 +4,9 @@ View views[] = {
     //{(uint[]){ID_SERVER}, 1},
     //{(uint[]){ID_SERVER, ID_SECTION}, 2},
     //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT}, 3},
-    //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE}, 4},
-    //{(uint[]){ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL}, 4},
-    {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL}, 8}
+    //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE}, 4}, // ad_space_pk
+    //{(uint[]){ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 4}, // ad_pk
+    {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 8}
 };
 
 void parse_line(char **fields, Dstats *dstats) {
