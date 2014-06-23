@@ -1,6 +1,6 @@
 #include "integration.h"
 
-ulong process_results(HllDictionary *table, uint b) {
+ulong process_results(HllDictionary *table, uint b, uint hour) {
     HllDictionary *h, *tmp;
     uint card;
     ulong bytes_sum = 0;
@@ -26,8 +26,8 @@ ulong process_results(HllDictionary *table, uint b) {
     HASH_CLEAR(hh, table);
     free(compressed);
     printf("Soucet vsech kardinalit:   %lu\n", sum_cardinality);
-    printf("Celkova velikost vektoru:  %g MB\n", bytes_sum / (1024*1024.0));
-    printf("Prumerna velikost vektoru: %g B\n", (bytes_sum / (double)i));
+    printf("Celkova velikost vektoru:  %u MB\n", bytes_sum / 1024);
+    printf("Prumerna velikost vektoru: %u B\n", (bytes_sum / i));
     return bytes_sum;
 }
 
@@ -41,7 +41,7 @@ void run_integration_test(const char *path) {
         tinydir_open(&dir, path); // ToDo: error handling
         process_all_files(&dir, &table, b, hour);
         if (table != NULL) {
-            bytes_sum += process_results(table, b);
+            bytes_sum += process_results(table, b, hour);
         }
         tinydir_close(&dir);
     }
