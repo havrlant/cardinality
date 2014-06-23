@@ -42,15 +42,14 @@ char *build_hash_id(View view, char** fields) {
 
 void process_file(const char *path, HllDictionary **hlls_table, uint b) {
     SimpleCSVParser parser;
-    Dstats stats;
     HllDictionary *hll_for_the_id;
     Hyperloglog *hll = NULL;
     uint64_t digest_value;
     char *hash_id;
+    char *uuid;
     
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
-        parse_line(parser.fields, &stats);
         for (uint i = 0; i < VIEWS_COUNT; i++) {
             hash_id = build_hash_id(views[i], parser.fields);
             hll_for_the_id = find_hll(hash_id, hlls_table);
@@ -63,7 +62,8 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
                 free(hash_id);
             }
             
-            digest_value = MurmurHash64A(stats.uuid, (int)strlen(stats.uuid), 42);
+            uuid = parser.fields[UUID_INDEX];
+            digest_value = MurmurHash64A(uuid, (int)uuid, 42);
             updateM(hll, digest_value);
         }
         
