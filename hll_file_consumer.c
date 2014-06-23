@@ -106,11 +106,10 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint
         
         if (file.name[0] != '.') {
             filehour = get_hour_from_dstats(file.path);
-            printf("%u, %u\n", filehour, hour);
             if (filehour == hour) {
                 counter++;
                 if (counter % 10 == 0) {
-                    printf("Zpracoval jsem %u souboru.\n", counter);
+                    printf("Zpracoval jsem %u souboru patrici %u. hodine.\n", counter, hour);
                 }
                 process_file(file.path, hlls_table, b);
             }
@@ -128,6 +127,7 @@ void hyperloglog(uint b, const char *path) {
         table = NULL;
         if (try_open_dir(&dir, path)) {
             process_all_files(dir, &table, b, hour);
+            printf("%u. hodina\n", hour);
             print_results(table, b);
             tinydir_close(&dir);
         }
