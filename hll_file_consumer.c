@@ -98,10 +98,6 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint
     uint filehour;
     
     while (dir.has_next) {
-        counter++;
-        if (counter % 10 == 0) {
-            printf("Zpracoval jsem %u souboru.\n", counter);
-        }
         tinydir_file file;
         if (tinydir_readfile(&dir, &file) == -1) {
             perror("Error getting file");
@@ -112,6 +108,10 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint
             filehour = get_hour_from_dstats(file.path);
             printf("%u, %u\n", filehour, hour);
             if (filehour == hour) {
+                counter++;
+                if (counter % 10 == 0) {
+                    printf("Zpracoval jsem %u souboru.\n", counter);
+                }
                 process_file(file.path, hlls_table, b);
             }
         }
