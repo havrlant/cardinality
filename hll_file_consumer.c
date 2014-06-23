@@ -108,7 +108,7 @@ void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint
             filehour = get_hour_from_dstats(file.path);
             if (filehour == hour) {
                 counter++;
-                if (counter % 10 == 0) {
+                if (counter % 50 == 0) {
                     printf("Zpracoval jsem %u souboru patrici %u. hodine.\n", counter, hour);
                 }
                 process_file(file.path, hlls_table, b);
