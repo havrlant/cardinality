@@ -89,8 +89,8 @@ void print_results(HllDictionary *hlls_table, uint b) {
         free(h->hash_id);
     }
     free(compressed);
-    printf("Celkovy pocet megabytu:             %g\n", bytes_sum / (1024*1024.0));
-    printf("Prumerna velikost vektoru v bytech: %g\n", (bytes_sum / (double)i));
+    printf("Celkova velikost vektoru:  %g MB\n", bytes_sum / (1024*1024.0));
+    printf("Prumerna velikost vektoru: %g B\n", (bytes_sum / (double)i));
 }
 
 void process_all_files(tinydir_dir dir, HllDictionary **hlls_table, uint b, uint hour) {
