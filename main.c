@@ -5,19 +5,19 @@
 
 int main(int argc, const char * argv[])
 {
-    printf("asdasd");
     if (argc > 1) {
         if (strcmp(argv[1], "--test") == 0) {
             
             run_all_tests();
             // return 0;
             hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
+        } else {
+            uint b = 14;
+            if (argc > 2) {
+                b = (uint) atoi(argv[2]);
+            }
+            hyperloglog(b, argv[1]);
         }
-        uint b = 14;
-        if (argc > 2) {
-            b = (uint) atoi(argv[2]);
-        }
-        hyperloglog(b, argv[1]);
     } else {
         hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
     }

@@ -80,12 +80,17 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
     uint m = 1 << b;
     byte *compressed = (byte*) malloc(m);
     SparsePair *pairs = (SparsePair*) malloc(sizeof(SparsePair) * m); // ToDo dve tretiny m
+    uint32_t hll_compressed_size;
+    uint32_t sparse_size;
     HASH_ITER(hh, hlls_table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);
         // printf("%s:%u\n", h->hash_id, card);
         // save_sparse(h->hll, h->hash_id);
-        bytes_sum += min(compress_hll(h->hll, compressed), compress_sparse(h->hll, compressed, pairs));
+        hll_compressed_size = compress_hll(h->hll, compressed);
+        sparse_size = compress_sparse(h->hll, compressed, pairs);
+        printf("%u, %u, %u\n", hll_compressed_size, sparse_size, min(hll_compressed_size, sparse_size));
+        bytes_sum += min(hll_compressed_size, sparse_size);
         free(h->hll->M);
         free(h->hll);
         free(h->hash_id);
@@ -126,13 +131,13 @@ void hyperloglog(uint b, const char *path) {
     tinydir_dir dir;
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
-        tinydir_open(&dir, path);
+        tinydir_open(&dir, path); // ToDo: error handling
         process_all_files(&dir, &table, b, hour);
         if (table != NULL) {
             printf("%u. hodina\n", hour);
             bytes_sum += print_results(table, b);
         }
-            tinydir_close(&dir);
+        tinydir_close(&dir);
     }
     printf("\n\nVelikost vsech vektoru z daneho dne: %u MB\n", (uint) (bytes_sum / (1024*1024)));
 }
