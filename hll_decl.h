@@ -9,6 +9,10 @@ typedef struct {
     byte *M;
 } Hyperloglog;
 
+// pack(1) znamena, ze se struktura bude ukladat pametove efektivne
+// bez tohoto by se struktura s uint16_t a byte ulozila do 4 bytu.
+// S timto se ulozi do 3.
+
 #pragma pack(1)
 
 typedef struct {
@@ -16,6 +20,8 @@ typedef struct {
     byte value;
 } SparsePair;
 
+// Ostatni struktury chceme ukladat normalne
+// Napr. zlib bez tohoto nefunguje a hlasi chybu Z_VERSION_ERROR
 #pragma pack()
 
 typedef struct {

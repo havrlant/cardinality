@@ -32,6 +32,6 @@ uint max(uint a, uint b) {
     return a > b ? a : b;
 }
 
-uint min(uint a, uint b) {
+ulong min_ulong(ulong a, ulong b) {
     return a > b ? b : a;
 }

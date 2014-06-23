@@ -75,13 +75,13 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
 uint64_t print_results(HllDictionary *hlls_table, uint b) {
     HllDictionary *h, *tmp;
     uint card;
-    uint64_t bytes_sum = 0;
+    ulong bytes_sum = 0;
     uint i = 0;
     uint m = 1 << b;
     byte *compressed = (byte*) malloc(m);
     SparsePair *pairs = (SparsePair*) malloc(sizeof(SparsePair) * m); // ToDo dve tretiny m
-    uint32_t hll_compressed_size;
-    uint32_t sparse_size;
+    ulong hll_compressed_size;
+    ulong sparse_size;
     HASH_ITER(hh, hlls_table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);
@@ -89,7 +89,7 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
         // save_sparse(h->hll, h->hash_id);
         hll_compressed_size = compress_hll(h->hll, compressed);
         sparse_size = compress_sparse(h->hll, compressed, pairs);
-        bytes_sum += min(hll_compressed_size, sparse_size);
+        bytes_sum += min_ulong(hll_compressed_size, sparse_size);
         free(h->hll->M);
         free(h->hll);
         free(h->hash_id);

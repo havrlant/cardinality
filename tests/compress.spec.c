@@ -1,6 +1,6 @@
 #include "compress.spec.h"
 
-void test_comress() {
+void test_comress_hll() {
     uint b = 10;
     Hyperloglog *hll = create_hll(b);
     byte *compressed = (byte*) malloc(1 << b);
@@ -16,5 +16,5 @@ void test_comress() {
 }
 
 void run_all_compress() {
-    test_comress();
+    test_comress_hll();
 }

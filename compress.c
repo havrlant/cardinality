@@ -1,6 +1,6 @@
 #include "compress.h"
 
-uint32_t compress_bytes(byte *array, byte *compressed, uint size_input, uint size_output) {
+ulong compress_bytes(byte *array, byte *compressed, uint size_input, uint size_output) {
     z_stream defstream;
     defstream.zalloc = Z_NULL;
     defstream.zfree = Z_NULL;
@@ -15,15 +15,15 @@ uint32_t compress_bytes(byte *array, byte *compressed, uint size_input, uint siz
     deflate(&defstream, Z_FINISH);
     deflateEnd(&defstream);
     
-    return (uint32_t)defstream.total_out;
+    return defstream.total_out;
 }
 
-uint32_t compress_hll(Hyperloglog *hll, byte *compressed) {
+ulong compress_hll(Hyperloglog *hll, byte *compressed) {
     return (uint)compress_bytes(hll->M, compressed, hll->m, hll->m);
 }
 
 
-uint32_t compress_sparse(Hyperloglog *hll, byte *compressed, SparsePair *temp) {
+ulong compress_sparse(Hyperloglog *hll, byte *compressed, SparsePair *temp) {
     double V = (double)count_zero_buckets(hll);
     uint temp_index = 0;
     if ((V / (double)hll->m) >= 2.0 / 3.0) {
@@ -36,8 +36,8 @@ uint32_t compress_sparse(Hyperloglog *hll, byte *compressed, SparsePair *temp) {
         }
         uint raw_size = temp_index * 3;
         uint compressed_size = (uint) compress_bytes((byte*)temp, compressed, raw_size, hll->m);
-        return min(compressed_size, raw_size);
+        return min_ulong(compressed_size, raw_size);
     } else {
-        return UINT32_MAX;
+        return ULONG_MAX;
     }
 }
