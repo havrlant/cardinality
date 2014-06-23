@@ -12,8 +12,11 @@
 #include <stdio.h>
 #include "hll_decl.h"
 #include "zlib/zlib.h"
+#include "linear_counting.h"
+#include "libs/utils.h"
 #include <stdint.h>
 
-uint64_t compress_hll(Hyperloglog *hll, byte *compressed);
+uint32_t compress_hll(Hyperloglog *hll, byte *compressed);
+uint32_t compress_sparse(Hyperloglog *hll, byte *compressed, SparsePair *temp);
 
 #endif

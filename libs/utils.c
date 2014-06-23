@@ -31,3 +31,7 @@ uint get_hour_from_dstats(const char *path) {
 uint max(uint a, uint b) {
     return a > b ? a : b;
 }
+
+uint min(uint a, uint b) {
+    return a > b ? b : a;
+}

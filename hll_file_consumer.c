@@ -77,13 +77,15 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
     uint card;
     uint64_t bytes_sum = 0;
     uint i = 0;
-    byte *compressed = (byte*) malloc(1 << b);
+    uint m = 1 << b;
+    byte *compressed = (byte*) malloc(m);
+    SparsePair *pairs = (SparsePair*) malloc(sizeof(SparsePair) * m); // ToDo dve tretiny m
     HASH_ITER(hh, hlls_table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);
         // printf("%s:%u\n", h->hash_id, card);
         // save_sparse(h->hll, h->hash_id);
-        bytes_sum += compress_hll(h->hll, compressed);
+        bytes_sum += min(compress_hll(h->hll, compressed), compress_sparse(h->hll, compressed, pairs));
         free(h->hll->M);
         free(h->hll);
         free(h->hash_id);
@@ -133,5 +135,5 @@ void hyperloglog(uint b, const char *path) {
             tinydir_close(&dir);
         }
     }
-    printf("\n\nVelikost vsech vektoru z daneho dne: %lu MB\n", (bytes_sum / (1024*1024)));
+    printf("\n\nVelikost vsech vektoru z daneho dne: %u MB\n", (uint) (bytes_sum / (1024*1024)));
 }
