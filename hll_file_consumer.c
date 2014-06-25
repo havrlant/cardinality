@@ -85,23 +85,22 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
     HASH_ITER(hh, hlls_table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);
-        // printf("%s:%u\n", h->hash_id, card);
-        hll_compressed_size = compress_hll(h->hll, compressed);
-        sparse_size = compress_sparse(h->hll, compressed, pairs);
-        bytes_sum += min_ulong(hll_compressed_size, sparse_size);
+        printf("%s:%u\n", h->hash_id, card);
+//         hll_compressed_size = compress_hll(h->hll, compressed);
+//         sparse_size = compress_sparse(h->hll, compressed, pairs);
+//         bytes_sum += min_ulong(hll_compressed_size, sparse_size);
         free(h->hll->M);
         free(h->hll);
         free(h->hash_id);
     }
     HASH_CLEAR(hh, hlls_table);
     free(compressed);
-    printf("Celkova velikost vektoru:  %g MB\n", bytes_sum / (1024*1024.0));
-    printf("Prumerna velikost vektoru: %g B\n", (bytes_sum / (double)i));
+//     printf("Celkova velikost vektoru:  %g MB\n", bytes_sum / (1024*1024.0));
+//     printf("Prumerna velikost vektoru: %g B\n", (bytes_sum / (double)i));
     return bytes_sum;
 }
 
-void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour, ViewFilter* vFilter) {
-    uint counter = 0;
+void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour, ViewFilter* vFilter, uint COMPUTE_ALL_DAY) {
     uint filehour;
     tinydir_file file;
 
@@ -113,8 +112,7 @@ void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uin
 
         if (file.name[0] != '.') {
             filehour = get_hour_from_dstats(file.path);
-            if (filehour == hour) {
-                counter++;
+            if (filehour == hour || COMPUTE_ALL_DAY) {
                 process_file(file.path, hlls_table, b, vFilter);
             }
         }
@@ -123,13 +121,14 @@ void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uin
 }
 
 void hyperloglog(uint b, const char *path) {
+    const uint COMPUTE_ALL_DAY = 1;
     View views[] = {
         //{(uint[]){ID_SERVER}, 1},
         //{(uint[]){ID_SERVER, ID_SECTION}, 2},
         //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT}, 3},
         //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE}, 4}, // ad_space_pk
         //{(uint[]){ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 4}, // ad_pk
-        {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 8}
+        {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 9}
     };
 
     ViewFilter vFilter = { views, 1 };
@@ -139,12 +138,15 @@ void hyperloglog(uint b, const char *path) {
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
         tinydir_open(&dir, path); // ToDo: error handling
-        process_all_files(&dir, &table, b, hour, &vFilter);
+        process_all_files(&dir, &table, b, hour, &vFilter, COMPUTE_ALL_DAY);
         if (table != NULL) {
-            printf("%u. hodina\n", hour);
+            printf("---------------\n%u. hodina\n", hour);
             bytes_sum += print_results(table, b);
+            printf("%u. hodina\n---------------\n", hour);
         }
         tinydir_close(&dir);
+
+        if (COMPUTE_ALL_DAY) break;
     }
     printf("\n\nVelikost vsech vektoru z daneho dne: %u MB\n", (uint) (bytes_sum / (1024*1024)));
 }

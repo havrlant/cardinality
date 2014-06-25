@@ -1,6 +1,5 @@
 #include "hyperloglog.h"
 
-const int AD_SPACE_PK_INDEX = 1;
 const int USER_PK_INDEX = 2;
 const int DIGEST_BIT_LENGTH = 64;
 const double LINEAR_COUNTING_LIMIT = 5;

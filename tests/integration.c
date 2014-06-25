@@ -52,7 +52,7 @@ void run_integration_test(const char *path) {
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
         tinydir_open(&dir, path); // ToDo: error handling
-        process_all_files(&dir, &table, b, hour, &test_vFilter);
+        process_all_files(&dir, &table, b, hour, &test_vFilter, 0);
         if (table != NULL) {
             bytes_sum += process_results(table, b, hour);
         }
