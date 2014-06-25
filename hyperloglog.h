@@ -26,7 +26,7 @@ typedef struct {
 
 uint bucket_index(uint64_t digest, uint b);
 uint rho(uint64_t digest, uint bitfrom);
-Hyperloglog *create_hll(uint b);
+Hyperloglog *create_hll(uint b, byte use_sparse);
 uint estimate_cardinality(Hyperloglog *hll);
 void updateM(Hyperloglog *hll, uint64_t digest);
 uint hyperloglog_cardinality(Hyperloglog *hll, double alpham);

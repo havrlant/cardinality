@@ -55,7 +55,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b, ViewFilt
             hll_for_the_id = find_hll(hash_id, hlls_table);
 
             if (hll_for_the_id == NULL) {
-                hll = create_hll(b);
+                hll = create_hll(b, 0);
                 add_hll_to_dict(hash_id, hll, hlls_table);
             } else {
                 hll = hll_for_the_id->hll;

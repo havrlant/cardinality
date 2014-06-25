@@ -2,7 +2,7 @@
 #include "../linear_counting.h"
 
 void test_count_zero_buckets() {
-    Hyperloglog *hll = create_hll(5);
+    Hyperloglog *hll = create_hll(5, 0);
     sassert(hll->m == count_zero_buckets(hll));
     hll->M[3] = 1;
     hll->M[8] = 2;

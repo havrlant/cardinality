@@ -36,7 +36,7 @@ void updateM(Hyperloglog *hll, uint64_t digest) {
     j = bucket_index(digest, hll->b);
     first1 = rho(digest, hll->b);
     if (hll->sparsed_used) {
-
+        // printf("adasd");
     } else {
         hll->M[j] = max(hll->M[j], first1);
     }
@@ -58,18 +58,24 @@ double compute_alpha(unsigned int m) {
     return 0.7213 / (1 + 1.079 / m);
 }
 
-void init_hll(Hyperloglog *hll, uint b) {
+void init_hll(Hyperloglog *hll, uint b, byte use_sparse) {
+    uint max_sparse_pairs = 1 << (b - 4);
     hll->b = b;
     hll->m = 1 << b; // 2^b
-    hll->M = (byte*) calloc(hll->m, sizeof(byte));
-    hll->sparsed_used = 0;
-    hll->pairs = (SparsePair*) malloc(sizeof(SparsePair) * 1 << (b - 4)); // 2^b-4
-    hll->last_index = 0;
+    hll->sparsed_used = use_sparse;
+    if (!use_sparse) {
+        hll->M = (byte*) calloc(hll->m, sizeof(byte));
+    } else {
+
+        hll->pairs = (SparsePair*) malloc(sizeof(SparsePair) * max_sparse_pairs); // 2^b-4
+        hll->last_index = 0;
+        hll->max_values = max_sparse_pairs;
+    }
 }
 
-Hyperloglog *create_hll(uint b) {
+Hyperloglog *create_hll(uint b, byte use_sparse) {
     Hyperloglog *hll = (Hyperloglog*) malloc(sizeof(Hyperloglog));
-    init_hll(hll, b);
+    init_hll(hll, b, use_sparse);
     return hll;
 }
 

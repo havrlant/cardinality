@@ -2,7 +2,7 @@
 
 Hyperloglog *mock_hll() {
     uint b = 2;
-    Hyperloglog *hll = create_hll(b);
+    Hyperloglog *hll = create_hll(b, 0);
     hll->M[0] = 5;
     hll->M[1] = 2;
     hll->M[2] = 0;
@@ -48,16 +48,28 @@ void test_estimate_cardinality() {
 void test_updateM() {
     byte results[] = {3, 4, 3, 3};
     uint b = 2;
-    Hyperloglog *hll = create_hll(b);
+    Hyperloglog *hll = create_hll(b, 0);
     uint64_t digest;
-    
+
     for (uint32_t i = 0; i < 10; i++) {
         digest = MurmurHash64A(&i, 4, 42);
         updateM(hll, digest);
     }
-    
+
     assert_array_eq(results, hll->M, hll->m, byte);
-    
+
+    free(hll);
+}
+
+void test_sparse_used() {
+    uint b = 14;
+    Hyperloglog *hll = create_hll(b, 0);
+    sassert(hll->sparsed_used == 0);
+    free(hll);
+    hll = create_hll(b, 1);
+    sassert(1 == hll->sparsed_used);
+    sassert(0 == hll->last_index);
+    sassert(1024 == hll->max_values);
     free(hll);
 }
 
@@ -74,4 +86,5 @@ void run_all_hyperloglog() {
     test_estimate_cardinality();
     test_updateM();
     test_size_of_Sparse_pair();
+    test_sparse_used();
 }

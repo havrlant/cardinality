@@ -26,6 +26,7 @@ typedef struct {
     SparsePair *pairs;
     byte sparsed_used;
     uint last_index;
+    uint max_values;
 } Hyperloglog;
 
 // pack(1) znamena, ze se struktura bude ukladat pametove efektivne
