@@ -10,11 +10,11 @@ ulong compress_bytes(byte *array, byte *compressed, uint size_input, uint size_o
     defstream.next_in = (Bytef *)array; // input char array
     defstream.avail_out = (uInt)size_output; // size of output
     defstream.next_out = (Bytef *)compressed; // output char array
-    
+
     deflateInit(&defstream, Z_BEST_COMPRESSION);
     deflate(&defstream, Z_FINISH);
     deflateEnd(&defstream);
-    
+
     return defstream.total_out;
 }
 

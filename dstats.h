@@ -24,22 +24,13 @@
 #include <stdlib.h>
 
 typedef struct {
-    char *id_server;
-    char *id_section;
-    char *id_placement;
-    char *banner_type;
-    char *uuid;
-} Dstats;
-
-typedef struct {
     uint *fields_indices;
     uint fields_count;
 } View;
 
-#define VIEWS_COUNT 1
-View views[VIEWS_COUNT];
-
-void parse_line(char **fields, Dstats *dstats);
-
+typedef struct {
+    View *views;
+    uint length;
+} ViewFilter;
 
 #endif

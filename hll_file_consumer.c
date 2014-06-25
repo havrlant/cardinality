@@ -40,20 +40,20 @@ char *build_hash_id(View view, char** fields) {
     return newstring;
 }
 
-void process_file(const char *path, HllDictionary **hlls_table, uint b) {
+void process_file(const char *path, HllDictionary **hlls_table, uint b, ViewFilter *vFilter) {
     SimpleCSVParser parser;
     HllDictionary *hll_for_the_id;
     Hyperloglog *hll = NULL;
     uint64_t digest_value;
     char *hash_id;
     char *uuid;
-    
+
     init_parser(&parser, try_fopen(path), MAXIMUM_CSV_LINE_LENGTH, 29, '\t');
     while (next_line(&parser)) {
-        for (uint i = 0; i < VIEWS_COUNT; i++) {
-            hash_id = build_hash_id(views[i], parser.fields);
+        for (uint i = 0; i < vFilter->length; i++) {
+            hash_id = build_hash_id(vFilter->views[i], parser.fields);
             hll_for_the_id = find_hll(hash_id, hlls_table);
-            
+
             if (hll_for_the_id == NULL) {
                 hll = create_hll(b);
                 add_hll_to_dict(hash_id, hll, hlls_table);
@@ -61,14 +61,14 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b) {
                 hll = hll_for_the_id->hll;
                 free(hash_id);
             }
-            
+
             uuid = parser.fields[UUID_INDEX];
             digest_value = MurmurHash64A(uuid, (int)strlen(uuid), 42);
             updateM(hll, digest_value);
         }
-        
+
     }
-    
+
     free_parser(&parser);
 }
 
@@ -100,37 +100,46 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
     return bytes_sum;
 }
 
-void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour) {
+void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour, ViewFilter* vFilter) {
     uint counter = 0;
     uint filehour;
     tinydir_file file;
-    
+
     while (dir->has_next) {
         if (tinydir_readfile(dir, &file) == -1) {
             perror("Error getting file");
             return;
         }
-        
+
         if (file.name[0] != '.') {
             filehour = get_hour_from_dstats(file.path);
             if (filehour == hour) {
                 counter++;
-                process_file(file.path, hlls_table, b);
+                process_file(file.path, hlls_table, b, vFilter);
             }
         }
-        
-		tinydir_next(dir);
+        tinydir_next(dir);
 	}
 }
 
 void hyperloglog(uint b, const char *path) {
+    View views[] = {
+        //{(uint[]){ID_SERVER}, 1},
+        //{(uint[]){ID_SERVER, ID_SECTION}, 2},
+        //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT}, 3},
+        //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE}, 4}, // ad_space_pk
+        //{(uint[]){ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 4}, // ad_pk
+        {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 8}
+    };
+
+    ViewFilter vFilter = { views, 1 };
     HllDictionary *table;
     uint64_t bytes_sum = 0;
     tinydir_dir dir;
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
         tinydir_open(&dir, path); // ToDo: error handling
-        process_all_files(&dir, &table, b, hour);
+        process_all_files(&dir, &table, b, hour, &vFilter);
         if (table != NULL) {
             printf("%u. hodina\n", hour);
             bytes_sum += print_results(table, b);

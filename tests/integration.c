@@ -40,6 +40,11 @@ ulong process_results(HllDictionary *table, uint b, uint hour) {
 }
 
 void run_integration_test(const char *path) {
+    View test_views[] = {
+        {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 8}
+    };
+
+    ViewFilter test_vFilter = { test_views, 1 };
     uint b = 4;
     HllDictionary *table;
     ulong bytes_sum = 0;
@@ -47,7 +52,7 @@ void run_integration_test(const char *path) {
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
         tinydir_open(&dir, path); // ToDo: error handling
-        process_all_files(&dir, &table, b, hour);
+        process_all_files(&dir, &table, b, hour, &test_vFilter);
         if (table != NULL) {
             bytes_sum += process_results(table, b, hour);
         }
