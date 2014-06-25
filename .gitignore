@@ -1,2 +1,5 @@
 *.1
 cardinality
+.kdev4
+*kate-swp
+*kdev4
