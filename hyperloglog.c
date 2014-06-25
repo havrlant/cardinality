@@ -66,7 +66,6 @@ void init_hll(Hyperloglog *hll, uint b, byte use_sparse) {
     if (!use_sparse) {
         hll->M = (byte*) calloc(hll->m, sizeof(byte));
     } else {
-
         hll->pairs = (SparsePair*) malloc(sizeof(SparsePair) * max_sparse_pairs); // 2^b-4
         hll->last_index = 0;
         hll->max_values = max_sparse_pairs;
