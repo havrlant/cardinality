@@ -3,16 +3,6 @@
 
 #include "declarations.h"
 
-typedef struct {
-    uint b;
-    uint m;
-    byte *M;
-} Hyperloglog;
-
-// pack(1) znamena, ze se struktura bude ukladat pametove efektivne
-// bez tohoto by se struktura s uint16_t a byte ulozila do 4 bytu.
-// S timto se ulozi do 3.
-
 #pragma pack(1)
 
 typedef struct {
@@ -28,5 +18,20 @@ typedef struct {
     uint16_t index;
     byte value;
 } _SparsePairForTestOnly;
+
+typedef struct {
+    uint b;
+    uint m;
+    byte *M;
+    SparsePair *pairs;
+    byte sparsed_used;
+    uint last_index;
+} Hyperloglog;
+
+// pack(1) znamena, ze se struktura bude ukladat pametove efektivne
+// bez tohoto by se struktura s uint16_t a byte ulozila do 4 bytu.
+// S timto se ulozi do 3.
+
+
 
 #endif

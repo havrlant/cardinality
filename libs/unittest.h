@@ -2,6 +2,7 @@
 #define parkc_unittest_h
 
 #include <string.h>
+#include <stdio.h>
 
 extern int _total_tests;
 extern int _total_errors;

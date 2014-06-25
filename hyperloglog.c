@@ -35,7 +35,11 @@ void updateM(Hyperloglog *hll, uint64_t digest) {
     uint j, first1;
     j = bucket_index(digest, hll->b);
     first1 = rho(digest, hll->b);
-    hll->M[j] = max(hll->M[j], first1);
+    if (hll->sparsed_used) {
+
+    } else {
+        hll->M[j] = max(hll->M[j], first1);
+    }
 }
 
 uint hyperloglog_cardinality(Hyperloglog *hll, double alpham) {
@@ -58,6 +62,9 @@ void init_hll(Hyperloglog *hll, uint b) {
     hll->b = b;
     hll->m = 1 << b; // 2^b
     hll->M = (byte*) calloc(hll->m, sizeof(byte));
+    hll->sparsed_used = 0;
+    hll->pairs = (SparsePair*) malloc(sizeof(SparsePair) * 1 << (b - 4)); // 2^b-4
+    hll->last_index = 0;
 }
 
 Hyperloglog *create_hll(uint b) {

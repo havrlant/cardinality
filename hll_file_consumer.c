@@ -79,9 +79,9 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
     uint i = 0;
     uint m = 1 << b;
     byte *compressed = (byte*) malloc(m);
-    SparsePair *pairs = (SparsePair*) malloc(sizeof(SparsePair) * m); // ToDo dve tretiny m
-    ulong hll_compressed_size;
-    ulong sparse_size;
+    //SparsePair *pairs = (SparsePair*) malloc(sizeof(SparsePair) * m); // ToDo dve tretiny m
+    //ulong hll_compressed_size;
+    //ulong sparse_size;
     HASH_ITER(hh, hlls_table, h, tmp) {
         i++;
         card = estimate_cardinality(h->hll);

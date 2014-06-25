@@ -6,6 +6,7 @@
 #include "hyperloglog.spec.h"
 #include "linear_counting.spec.h"
 #include "hll_file_consumer.spec.h"
+#include "sparse.spec.h"
 
 void run_all_tests();
 
