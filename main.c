@@ -23,8 +23,12 @@ int main(int argc, const char * argv[])
             hyperloglog(b, argv[1]);
         }
     } else {
-        hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
+        run_all_tests();
+        run_integration_test("/home/lukas/Data/test500");
     }
-    
+//         run_integration_test("/home/lukas/Data/test500");
+        //hyperloglog(14, "/Users/lukashavrlant/Desktop/test");
+        // printf("It's working!\n");
+
     return 0;
 }

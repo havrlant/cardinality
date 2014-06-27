@@ -22,7 +22,7 @@
 
 extern const uint HOURS_IN_DAY;
 
-void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour, ViewFilter *views, uint COMPUT_ALL_DAY);
+void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour, ViewFilter *views, uint COMPUT_ALL_DAY, byte use_sparse);
 void hyperloglog(uint b, const char *path);
 size_t compute_hash_length(View view, char** fields);
 char *build_hash_id(View view, char** fields);

@@ -27,11 +27,12 @@ typedef struct {
     byte sparsed_used;
     uint last_index;
     uint max_values;
+    uint sparse_b_difference;
 } Hyperloglog;
 
 // pack(1) znamena, ze se struktura bude ukladat pametove efektivne
 // bez tohoto by se struktura s uint16_t a byte ulozila do 4 bytu.
-// S timto se ulozi do 3.
+// S timto se ulozi do 3. Je to zase pomalejsi. 
 
 
 

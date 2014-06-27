@@ -3,6 +3,8 @@
 
 #include "init.h"
 #include "../sparse.h"
+#include "../hll_decl.h"
+#include "../hyperloglog.h"
 
 void run_all_sparse();
 

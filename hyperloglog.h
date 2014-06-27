@@ -18,6 +18,7 @@
 #include "compress.h"
 #include "libs/utils.h"
 #include "linear_counting.h"
+#include "sparse.h"
 
 typedef struct {
     uint16_t index;
@@ -32,5 +33,6 @@ void updateM(Hyperloglog *hll, uint64_t digest);
 uint hyperloglog_cardinality(Hyperloglog *hll, double alpham);
 double compute_alpha(unsigned int m);
 uint apply_corrections(Hyperloglog *hll, uint hll_cardinality);
+double sum_hll(Hyperloglog *hll);
 
 #endif

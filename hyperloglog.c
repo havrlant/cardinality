@@ -36,19 +36,33 @@ void updateM(Hyperloglog *hll, uint64_t digest) {
     j = bucket_index(digest, hll->b);
     first1 = rho(digest, hll->b);
     if (hll->sparsed_used) {
-        // printf("adasd");
+        update_sparse_list(hll, j, first1);
     } else {
         hll->M[j] = max(hll->M[j], first1);
     }
 }
 
+double sum_hll(Hyperloglog *hll) {
+    double sum = 0;
+    if (hll->sparsed_used) {
+        for (int i = 0; i < hll->last_index; i++) {
+            if (hll->pairs[i].value) {
+                sum += pow(2, -(hll->pairs[i].value));
+            }
+        }
+        sum += count_zero_buckets(hll);
+    } else {
+        for (int i = 0; i < hll->m; i++) {
+            sum += pow(2, -(hll->M[i]));
+        }
+    }
+    return sum;
+}
+
 uint hyperloglog_cardinality(Hyperloglog *hll, double alpham) {
-    uint j;
     double E = 0;
     double sum = 0, harmonicMean;
-    for (j = 0; j < hll->m; j++) {
-        sum += pow(2, -(hll->M[j]));
-    }
+    sum = sum_hll(hll);
     harmonicMean = hll->m / sum;
     E = alpham * hll->m * harmonicMean;
     return (uint)E;
@@ -59,16 +73,18 @@ double compute_alpha(unsigned int m) {
 }
 
 void init_hll(Hyperloglog *hll, uint b, byte use_sparse) {
-    uint max_sparse_pairs = 1 << (b - 4);
     hll->b = b;
     hll->m = 1 << b; // 2^b
     hll->sparsed_used = use_sparse;
     if (!use_sparse) {
         hll->M = (byte*) calloc(hll->m, sizeof(byte));
     } else {
+        uint sparse_b_difference = 4;
+        uint max_sparse_pairs = 1 << (b - sparse_b_difference);
         hll->pairs = (SparsePair*) malloc(sizeof(SparsePair) * max_sparse_pairs); // 2^b-4
         hll->last_index = 0;
         hll->max_values = max_sparse_pairs;
+        hll->sparse_b_difference = sparse_b_difference;
     }
 }
 

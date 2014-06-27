@@ -40,7 +40,7 @@ char *build_hash_id(View view, char** fields) {
     return newstring;
 }
 
-void process_file(const char *path, HllDictionary **hlls_table, uint b, ViewFilter *vFilter) {
+void process_file(const char *path, HllDictionary **hlls_table, uint b, ViewFilter *vFilter, byte use_sparse) {
     SimpleCSVParser parser;
     HllDictionary *hll_for_the_id;
     Hyperloglog *hll = NULL;
@@ -55,7 +55,7 @@ void process_file(const char *path, HllDictionary **hlls_table, uint b, ViewFilt
             hll_for_the_id = find_hll(hash_id, hlls_table);
 
             if (hll_for_the_id == NULL) {
-                hll = create_hll(b, 0);
+                hll = create_hll(b, use_sparse);
                 add_hll_to_dict(hash_id, hll, hlls_table);
             } else {
                 hll = hll_for_the_id->hll;
@@ -100,7 +100,7 @@ uint64_t print_results(HllDictionary *hlls_table, uint b) {
     return bytes_sum;
 }
 
-void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour, ViewFilter* vFilter, uint COMPUTE_ALL_DAY) {
+void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uint hour, ViewFilter* vFilter, uint COMPUTE_ALL_DAY, byte use_sparse) {
     uint filehour;
     tinydir_file file;
 
@@ -113,7 +113,7 @@ void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uin
         if (file.name[0] != '.') {
             filehour = get_hour_from_dstats(file.path);
             if (filehour == hour || COMPUTE_ALL_DAY) {
-                process_file(file.path, hlls_table, b, vFilter);
+                process_file(file.path, hlls_table, b, vFilter, use_sparse);
             }
         }
         tinydir_next(dir);
@@ -138,7 +138,7 @@ void hyperloglog(uint b, const char *path) {
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
         tinydir_open(&dir, path); // ToDo: error handling
-        process_all_files(&dir, &table, b, hour, &vFilter, COMPUTE_ALL_DAY);
+        process_all_files(&dir, &table, b, hour, &vFilter, COMPUTE_ALL_DAY, 1);
         if (table != NULL) {
             printf("---------------\n%u. hodina\n", hour);
             bytes_sum += print_results(table, b);
