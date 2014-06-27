@@ -137,7 +137,6 @@ void hyperloglog(uint b, const char *path) {
         //{(uint[]){ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 4}, // ad_pk
         {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 9}
     };
-    
 
     ViewFilter vFilter = { views, 1 };
     HllDictionary *table;
