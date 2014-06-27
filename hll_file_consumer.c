@@ -87,7 +87,7 @@ ulong print_results(HllDictionary *hlls_table, uint b) {
         i++;
         card = estimate_cardinality(h->hll);
         cardinality_sum += card;
-//         printf("%s:%u\n", h->hash_id, card);
+        printf("%s:%u\n", h->hash_id, card);
 //         hll_compressed_size = compress_hll(h->hll, compressed);
 //         sparse_size = compress_sparse(h->hll, compressed, pairs);
 //         bytes_sum += min_ulong(hll_compressed_size, sparse_size);
@@ -128,27 +128,37 @@ void process_all_files(tinydir_dir *dir, HllDictionary **hlls_table, uint b, uin
 
 void hyperloglog(uint b, const char *path) {
     const uint compute_all_day = 0;
-    const uint use_sparse = 0;
+    const uint use_sparse = 1;
+
     View views[] = {
+        {(uint[]){ID_CAMPAIGN}, 1},
+        {(uint[]){ID_CAMPAIGN, ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE}, 5},
+        {(uint[]){ID_CAMPAIGN, ID_PLAN_CAMPAIGN}, 2},
+        {(uint[]){ID_CAMPAIGN, ID_CHANNEL}, 2},
+        {(uint[]){ID_CAMPAIGN, ID_SERVER}, 2},
+        {(uint[]){ID_CAMPAIGN, ID_COUNTRY, ID_REGION}, 3},
+        {(uint[]){ID_CAMPAIGN, BROWSER_ID}, 2},
+        {(uint[]){ID_CAMPAIGN, OS_ID}, 2},
+        {(uint[]){ID_CAMPAIGN, SCREENWIDTH, SCREENHEIGHT}, 3},
+        {(uint[]){ID_CAMPAIGN, COOKIE_ENABLED}, 2},
         //{(uint[]){ID_SERVER}, 1},
         //{(uint[]){ID_SERVER, ID_SECTION}, 2},
         //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT}, 3},
         //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE}, 4}, // ad_space_pk
         //{(uint[]){ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 4}, // ad_pk
-        {(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 9}
+        //{(uint[]){ID_SERVER, ID_SECTION, ID_PLACEMENT, BANNER_TYPE, ID_CAMPAIGN, ID_PLAN_CAMPAIGN, ID_BANNER, ID_CHANNEL, BANNER_VERSION}, 9}
     };
 
-    ViewFilter vFilter = { views, 1 };
+    ViewFilter vFilter = { views, 9 };
     HllDictionary *table;
-    ulong cardinality_sum = 0;
     tinydir_dir dir;
     for (uint hour = 0; hour < HOURS_IN_DAY; hour++) {
         table = NULL;
         tinydir_open(&dir, path); // ToDo: error handling
         process_all_files(&dir, &table, b, hour, &vFilter, compute_all_day, use_sparse);
         if (table != NULL) {
-            cardinality_sum = print_results(table, b);
-            printf("%u. hodina: %lu\n", hour, cardinality_sum);
+            print_results(table, b);
+//             printf("%u. hodina: %lu\n", hour, cardinality_sum);
         }
         tinydir_close(&dir);
 

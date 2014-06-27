@@ -23,8 +23,8 @@
 #define UniqueUserIDpartIP 11
 #define BROWSER_ID 12
 #define OS_ID 13
-#define IP_COUNTRY 14
-#define IP_REGION 15
+#define ID_COUNTRY 14
+#define ID_REGION 15
 #define SITE_CATEGORY 16
 #define BANNER_VERSION 17
 #define REMOTE_HOST 18
